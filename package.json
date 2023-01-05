@@ -11,12 +11,13 @@
     "src/main/react-mui-components/Dialog.js"
   ],
   "scripts": {
-    "build": "rescript",
-    "build-with-deps": "rescript build -with-deps",
-    "build-with-deps-and-test": "rescript build -with-deps && mocha src/test/**/*.js",
+    "clean-and-compile-with-deps": "npm run clean && npm run compile-with-deps",
+    "compile": "rescript",
+    "compile-with-deps": "rescript build -with-deps",
+    "compile-with-deps-and-test": "rescript build -with-deps && mocha src/test/**/*.js",
+    "compile-test": "rescript && mocha src/test/**/*.js",
     "clean": "rescript clean -with-deps && echo Cleaning completed.",
-    "start": "rescript build -w",
-    "build-and-test": "rescript && mocha src/test/**/*.js"
+    "start": "rescript build -w"
   },
   "keywords": [
     "rescript"

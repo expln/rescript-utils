@@ -79,7 +79,7 @@ object Tools {
     private fun buildProject() {
         log("buildProject")
         val result: Pair<String?, Matcher?>? = runCommand(
-            "npm run build-with-deps-and-test",
+            "npm run compile-with-deps-and-test",
             compile(".*\\d+ passing \\(\\d+ms\\).*")
         )
         if (result == null || result.first?.contains("BUILD FAILED")?:true) {
