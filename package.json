@@ -7,7 +7,8 @@
     "LICENSE",
     "bsconfig.json",
     "src/main/**/*.res",
-    "src/main/**/*.resi"
+    "src/main/**/*.resi",
+    "src/main/react-mui-components/Dialog.js"
   ],
   "scripts": {
     "build": "rescript",
