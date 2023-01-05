@@ -1,0 +1,43 @@
+{
+	// Place your global snippets here. Each snippet is defined under a snippet name and has a scope, prefix, body and
+	// description. Add comma separated ids of the languages where the snippet is applicable in the scope field. If scope
+	// is left empty or omitted, the snippet gets applied to all languages. The prefix is what is
+	// used to trigger the snippet and the body will be expanded and inserted. Possible variables are:
+	// $1, $2 for tab stops, $0 for the final cursor position, and ${1:label}, ${2:another} for placeholders.
+	// Placeholders with the same ids are connected.
+	// Example:
+	// "Print to console": {
+	// 	"scope": "javascript,typescript",
+	// 	"prefix": "log",
+	// 	"body": [
+	// 		"console.log('$1');",
+	// 		"$2"
+	// 	],
+	// 	"description": "Log output to console"
+	// }
+
+	"React.null": { "scope": "", "prefix": "null", "body": [ "React.null" ] },
+	"React.string": { "scope": "", "prefix": "str", "body": [ "React.string($0)" ] },
+	"React.array": { "scope": "", "prefix": "arr", "body": [ "React.array($0)" ] },
+	"ReactDOM.Style.make": { "scope": "", "prefix": "stl", "body": [ "ReactDOM.Style.make($0, ())" ] },
+	"react-state": { "scope": "", "prefix": "@s", "body": [
+		"$0${TM_CURRENT_LINE/^(\\s*)(\\S)(.*)@s$/\n$1let ($2$3, set${2:/upcase}$3) = React.useState(_ => )/}"
+    ] },
+	"tag2": { "scope": "", "prefix": "@t", "body": [
+		"$0${TM_CURRENT_LINE/^(\\s*)(\\S.*)@t$/\n$1<$2>\n$1<\\/$2>/}"
+    ] },
+
+	"contents": { "scope": "", "prefix": ".co", "body": [ ".contents" ] },
+	"ignore": { "scope": "", "prefix": ".ig", "body": [ "->ignore" ] },
+	"callback": { "scope": "", "prefix": "cb", "body": [ "_ => " ] },
+
+	"log-var": { "scope": "", "prefix": "@l", "body": [
+		"$0${TM_CURRENT_LINE/^(\\s*)(\\S.*)@l$/\n$1Js.Console.log2(\"$2\", $2)/}"
+    ] },
+	"log-text": { "scope": "", "prefix": "@lt", "body": [
+		"$0${TM_CURRENT_LINE/^(\\s*)(\\S.*)@lt$/\n$1Js.Console.log(\"$2\")/}"
+    ] },
+	"log-delim": { "scope": "", "prefix": "@ld", "body": [
+		"$0${TM_CURRENT_LINE/^(\\s*)(\\S.*)@ld$/\n$1Js.Console.log(\"-------------- $2 ------------------------------------------------------------\")/}"
+    ] },
+}
