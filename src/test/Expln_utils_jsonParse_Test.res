@@ -233,7 +233,7 @@ describe("Expln_utils_json.asInt", _ => {
         })
 
         //then
-        assertEq(p, Error("Parse error: a number was expected at '/arr/1'."))
+        assertEq(p, Error("Parse error: an integer was expected at '/arr/1'."))
     })
 })
 
@@ -267,4 +267,11 @@ describe("Expln_utils_json.asBool", _ => {
     })
 })
 
-Expln_utils_jsonParse.runTests___()
+describe("Expln_utils_json.pathToStr", _ => {
+    it("should return slash for empty path", _ => {
+        assertEq(test_pathToStr(list{}), "/")
+    })
+    it("should return slash separated values for non-empty path", _ => {
+        assertEq(test_pathToStr(list{"name", "14", "settings"}), "/settings/14/name")
+    })
+})
