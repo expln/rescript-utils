@@ -21,8 +21,6 @@ let pathToStr = path => {
     }
 }
 
-let pathToStr2 = (path,attrName) => pathToStr(list{attrName, ...path})
-
 let jsonToAny = (json,path):jsonAny => {
     switch json->Js.Json.classify {
         | JSONNull => JsonNull(path)
@@ -36,17 +34,15 @@ let jsonToAny = (json,path):jsonAny => {
 }
     
 
-let getPath = jsonAny => 
+let getPath = jsonAny =>
     switch jsonAny {
         | JsonNull(path) | JsonBool(_,path) | JsonNum(_,path) | JsonStr(_,path) | JsonArr(_,path) | JsonObj(_,path) => path
     }
 
-let getLocation2 = (jsonAny,nextPathElem) => pathToStr2(getPath(jsonAny),nextPathElem)
-
 let anyToBool = (jsonAny):result<option<bool>,string> => {
     switch jsonAny {
         | JsonNull(_) => Ok(None)
-        | JsonBool(val,path) => Ok(Some(val))
+        | JsonBool(val,_) => Ok(Some(val))
         | _ => Error(`a boolean value was expected at '${jsonAny->getPath->pathToStr}'.`)
     }
 }
@@ -54,7 +50,7 @@ let anyToBool = (jsonAny):result<option<bool>,string> => {
 let anyToNum = (jsonAny):result<option<float>,string> => {
     switch jsonAny {
         | JsonNull(_) => Ok(None)
-        | JsonNum(val,path) => Ok(Some(val))
+        | JsonNum(val,_) => Ok(Some(val))
         | _ => Error(`a number value was expected at '${jsonAny->getPath->pathToStr}'.`)
     }
 }
@@ -66,7 +62,7 @@ let anyToInt = (jsonAny):result<option<int>,string> => {
 let anyToStr = (jsonAny):result<option<string>,string> => {
     switch jsonAny {
         | JsonNull(_) => Ok(None)
-        | JsonStr(val,path) => Ok(Some(val))
+        | JsonStr(val,_) => Ok(Some(val))
         | _ => Error(`a number value was expected at '${jsonAny->getPath->pathToStr}'.`)
     }
 }
@@ -95,12 +91,20 @@ let getByPath = (obj:jsonAny, attrName: string):result<option<jsonAny>,string> =
     }
 }
 
-let asValOpt = (jsonAny, anyToVal:jsonAny=>result<option<'v>,string>): option<'v> => {
+let asValOpt = (
+    jsonAny, 
+    anyToVal:jsonAny=>result<option<'v>,string>, 
+    // validator:option<'v>=>result<option<'v>,string>,
+    // default:unit=>option<'v>
+): option<'v> => {
     switch anyToVal(jsonAny) {
         | Ok(valOpt) => valOpt
         | Error(msg) => exn(msg)
     }
 }
+
+let makeAsValOpt = (anyToVal:jsonAny=>result<option<'v>,string>):(jsonAny=>option<'v>) => 
+    jsonAny => asValOpt(jsonAny, anyToVal)
 
 let asVal = (jsonAny, anyToVal:jsonAny=>result<option<'v>,string>, descrOfExpectedValue:string): 'v => {
     switch asValOpt(jsonAny, anyToVal) {
@@ -108,6 +112,9 @@ let asVal = (jsonAny, anyToVal:jsonAny=>result<option<'v>,string>, descrOfExpect
         | None => exn(`${descrOfExpectedValue} was expected at '${jsonAny->getPath->pathToStr}'.`)
     }
 }
+
+let makeAsVal = (anyToVal:jsonAny=>result<option<'v>,string>, descrOfExpectedValue:string):(jsonAny=>'v) => 
+    jsonAny => asVal(jsonAny, anyToVal, descrOfExpectedValue)
 
 let valOpt = (jsonAny:jsonAny, attrName:string, anyToVal:jsonAny=>result<option<'v>,string>): option<'v> => {
     switch getByPath(jsonAny, attrName) {
@@ -117,6 +124,9 @@ let valOpt = (jsonAny:jsonAny, attrName:string, anyToVal:jsonAny=>result<option<
     }
 }
 
+let makeValOpt = (anyToVal:jsonAny=>result<option<'v>,string>):((jsonAny,string)=>option<'v>) => 
+    (jsonAny, attrName) => valOpt(jsonAny, attrName, anyToVal)
+
 let val = (jsonAny, attrName, anyToVal:jsonAny=>result<option<'v>,string>, descrOfExpectedValue:string): 'v => {
     switch valOpt(jsonAny, attrName, anyToVal) {
         | Some(val) => val
@@ -124,25 +134,28 @@ let val = (jsonAny, attrName, anyToVal:jsonAny=>result<option<'v>,string>, descr
     }
 }
 
-let asBoolOpt = (any:jsonAny):option<bool> => asValOpt(any, anyToBool)
-let asBool = (any:jsonAny):bool => asVal(any, anyToBool, "a boolean")
-let boolOpt = (obj:jsonAny, attrName:string):option<bool> => valOpt(obj, attrName, anyToBool)
-let bool = (obj:jsonAny, attrName:string):bool => val(obj, attrName, anyToBool, "a boolean")
+let makeVal = (anyToVal:jsonAny=>result<option<'v>,string>, descrOfExpectedValue:string):((jsonAny,string)=>'v) => 
+    (jsonAny, attrName) => val(jsonAny, attrName, anyToVal, descrOfExpectedValue)
 
-let asNumOpt = (any:jsonAny):option<float> => asValOpt(any, anyToNum)
-let asNum = (any:jsonAny):float => asVal(any, anyToNum, "a number")
-let numOpt = (obj:jsonAny, attrName:string):option<float> => valOpt(obj, attrName, anyToNum)
-let num = (obj:jsonAny, attrName:string):float => val(obj, attrName, anyToNum, "a number")
+let asBoolOpt = makeAsValOpt(anyToBool)
+let asBool = makeAsVal(anyToBool, "a boolean")
+let boolOpt = makeValOpt(anyToBool)
+let bool = makeVal(anyToBool, "a boolean")
 
-let asIntOpt = (any:jsonAny):option<int> => asValOpt(any, anyToInt)
-let asInt = (any:jsonAny):int => asVal(any, anyToInt, "an integer")
-let intOpt = (obj:jsonAny, attrName:string):option<int> => valOpt(obj, attrName, anyToInt)
-let int = (obj:jsonAny, attrName:string):int => val(obj, attrName, anyToInt, "an integer")
+let asNumOpt = makeAsValOpt(anyToNum)
+let asNum = makeAsVal(anyToNum, "a number")
+let numOpt = makeValOpt(anyToNum)
+let num = makeVal(anyToNum, "a number")
 
-let asStrOpt = (any:jsonAny):option<string> => asValOpt(any, anyToStr)
-let asStr = (any:jsonAny):string => asVal(any, anyToStr, "a string")
-let strOpt = (obj:jsonAny, attrName:string):option<string> => valOpt(obj, attrName, anyToStr)
-let str = (obj:jsonAny, attrName:string):string => val(obj, attrName, anyToStr, "a string")
+let asIntOpt = makeAsValOpt(anyToInt)
+let asInt = makeAsVal(anyToInt, "an integer")
+let intOpt = makeValOpt(anyToInt)
+let int = makeVal(anyToInt, "an integer")
+
+let asStrOpt = makeAsValOpt(anyToStr)
+let asStr = makeAsVal(anyToStr, "a string")
+let strOpt = makeValOpt(anyToStr)
+let str = makeVal(anyToStr, "a string")
 
 let asArrOpt = (arr:jsonAny, mapper:jsonAny=>'a):option<array<'a>> => asValOpt(arr, anyToArr(_,mapper))
 let asArr = (arr:jsonAny, mapper:jsonAny=>'a):array<'a> => asVal(arr, anyToArr(_,mapper), "an array")
