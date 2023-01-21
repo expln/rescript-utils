@@ -1,42 +1,40 @@
 type jsonAny
 
-let asBoolOpt: jsonAny => option<bool>
-let asBool: jsonAny => bool
-let boolOpt: (jsonAny, string) => option<bool>
-let bool: (jsonAny, string) => bool
+type validator<'v> = 'v => result<'v,string>
+type default<'v> = () => 'v
 
-// let boolOptWithDefault: (jsonAny, string, unit=>option<bool>) => option<bool>
-// let asBoolOptWithDefault: (jsonAny, unit=>option<bool>) => option<bool>
-// let boolWithDefault: (jsonAny, string, unit=>bool) => bool
-// let asBoolWithDefault: (jsonAny, unit=>bool) => bool
+let asBoolOpt: (jsonAny, ~validator:validator<option<bool>>=?, ~default:default<option<bool>>=?, ()) => option<bool>
+let asBool: (jsonAny, ~validator:validator<bool>=?, ~default:default<bool>=?, ()) => bool
+let boolOpt: (jsonAny, string, ~validator:validator<option<bool>>=?, ~default:default<option<bool>>=?, ()) => option<bool>
+let bool: (jsonAny, string, ~validator:validator<bool>=?, ~default:default<bool>=?, ()) => bool
 
-let asNumOpt: (jsonAny) => option<float>
-let asNum: (jsonAny) => float
-let numOpt: (jsonAny, string) => option<float>
-let num: (jsonAny, string) => float
+let asNumOpt: (jsonAny, ~validator:validator<option<float>>=?, ~default:default<option<float>>=?, ()) => option<float>
+let asNum: (jsonAny, ~validator:validator<float>=?, ~default:default<float>=?, ()) => float
+let numOpt: (jsonAny, string, ~validator:validator<option<float>>=?, ~default:default<option<float>>=?, ()) => option<float>
+let num: (jsonAny, string, ~validator:validator<float>=?, ~default:default<float>=?, ()) => float
 
-let asIntOpt: (jsonAny) => option<int>
-let asInt: (jsonAny) => int
-let intOpt: (jsonAny, string) => option<int>
-let int: (jsonAny, string) => int
+let asIntOpt: (jsonAny, ~validator:validator<option<int>>=?, ~default:default<option<int>>=?, ()) => option<int>
+let asInt: (jsonAny, ~validator:validator<int>=?, ~default:default<int>=?, ()) => int
+let intOpt: (jsonAny, string, ~validator:validator<option<int>>=?, ~default:default<option<int>>=?, ()) => option<int>
+let int: (jsonAny, string, ~validator:validator<int>=?, ~default:default<int>=?, ()) => int
 
-let asStrOpt: (jsonAny) => option<string>
-let asStr: (jsonAny) => string
-let strOpt: (jsonAny, string) => option<string>
-let str: (jsonAny, string) => string
+let asStrOpt: (jsonAny, ~validator:validator<option<string>>=?, ~default:default<option<string>>=?, ()) => option<string>
+let asStr: (jsonAny, ~validator:validator<string>=?, ~default:default<string>=?, ()) => string
+let strOpt: (jsonAny, string, ~validator:validator<option<string>>=?, ~default:default<option<string>>=?, ()) => option<string>
+let str: (jsonAny, string, ~validator:validator<string>=?, ~default:default<string>=?, ()) => string
 
-let asArrOpt: (jsonAny, jsonAny => 'a) => option<array<'a>>
-let asArr: (jsonAny, jsonAny => 'a) => array<'a>
-let arrOpt: (jsonAny, string, jsonAny => 'a) => option<array<'a>>
-let arr: (jsonAny, string, jsonAny => 'a) => array<'a>
+let asArrOpt: (jsonAny, jsonAny => 'a, ~validator:validator<option<array<'a>>>=?, ~default:default<option<array<'a>>>=?, ()) => option<array<'a>>
+let asArr: (jsonAny, jsonAny => 'a, ~validator:validator<array<'a>>=?, ~default:default<array<'a>>=?, ()) => array<'a>
+let arrOpt: (jsonAny, string, jsonAny => 'a, ~validator:validator<option<array<'a>>>=?, ~default:default<option<array<'a>>>=?, ()) => option<array<'a>>
+let arr: (jsonAny, string, jsonAny => 'a, ~validator:validator<array<'a>>=?, ~default:default<array<'a>>=?, ()) => array<'a>
 
-let objOpt: (jsonAny, string, jsonAny => 'a) => option<'a>
-let obj: (jsonAny, string, jsonAny => 'a) => 'a
+let asObjOpt: (jsonAny, jsonAny => 'a, ~validator:validator<option<'a>>=?, ~default:default<option<'a>>=?, ()) => option<'a>
+let asObj: (jsonAny, jsonAny => 'a, ~validator:validator<'a>=?, ~default:default<'a>=?, ()) => 'a
+let objOpt: (jsonAny, string, jsonAny => 'a, ~validator:validator<option<'a>>=?, ~default:default<option<'a>>=?, ()) => option<'a>
+let obj: (jsonAny, string, jsonAny => 'a, ~validator:validator<'a>=?, ~default:default<'a>=?, ()) => 'a
 
-let parseObjOpt: (string, jsonAny=>'a) => result<option<'a>,string>
-let parseObjOptWithDefault: (string, jsonAny=>'a, unit=>option<'a>) => option<'a>
-let parseObj: (string, jsonAny=>'a) => result<'a,string>
-let parseObjWithDefault: (string, jsonAny=>'a, unit=>'a) => 'a
+let parseJson: (string, jsonAny => 'a, ~validator: validator<'a>=?, ~default: default<'a>=?, ()) => result<'a, string>
+
 
 
 // TEST ----------------------------------------------------------------------------------

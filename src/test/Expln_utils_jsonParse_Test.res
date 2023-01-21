@@ -23,17 +23,21 @@ describe("Expln_utils_json.parseObj", _ => {
         }`
 
         //when
-        let p = parseObj(jsonStr, d => {
-            "name": d->str("name"),
-            "value": d->str("value"),
-            "num": d->num("num"),
-            "numOpt": d->numOpt("numOpt"),
-            "int": d->int("int"),
-            "intOpt": d->intOpt("intOpt"),
-            "boolFalse": d->bool("boolFalse"),
-            "boolTrue": d->bool("boolTrue"),
-            "boolOpt": d->boolOpt("boolOpt"),
-        })
+        let p = parseJson(
+            jsonStr, 
+            asObj(_, d => {
+                "name": d->str("name", ()),
+                "value": d->str("value", ()),
+                "num": d->num("num", ()),
+                "numOpt": d->numOpt("numOpt", ()),
+                "int": d->int("int", ()),
+                "intOpt": d->intOpt("intOpt", ()),
+                "boolFalse": d->bool("boolFalse", ()),
+                "boolTrue": d->bool("boolTrue", ()),
+                "boolOpt": d->boolOpt("boolOpt", ()),
+            }, ()), 
+            ()
+        )
 
         //then
         switch p {
@@ -58,10 +62,14 @@ describe("Expln_utils_json.parseObj", _ => {
         let jsonStr = `null`
 
         //when
-        let p = parseObj(jsonStr, d => {
-            name: d->str("name"),
-            value: d->str("value"),
-        })
+        let p = parseJson(
+            jsonStr, 
+            asObj(_, d => {
+                name: d->str("name", ()),
+                value: d->str("value", ()),
+            }, ()),
+            ()
+        )
 
         //then
         switch p {
@@ -75,10 +83,10 @@ describe("Expln_utils_json.parseObj", _ => {
         let jsonStr = `null-`
 
         //when
-        let p = parseObj(jsonStr, d => {
-            name: d->str("name"),
-            value: d->str("value"),
-        })
+        let p = parseJson(jsonStr, asObj(_, d => {
+            name: d->str("name", ()),
+            value: d->str("value", ()),
+        }, ()), ())
 
         //then
         switch p {
@@ -95,10 +103,10 @@ describe("Expln_utils_json.parseObj", _ => {
         }`
 
         //when
-        let p = parseObj(jsonStr, d => {
-            name: d->str("name"),
-            value: d->str("value"),
-        })
+        let p = parseJson(jsonStr, asObj(_, d => {
+            name: d->str("name", ()),
+            value: d->str("value", ()),
+        }, ()), ())
 
         //then
         switch p {
@@ -114,10 +122,10 @@ describe("Expln_utils_json.parseObj", _ => {
         }`
 
         //when
-        let p = parseObj(jsonStr, d => {
-            name: d->str("name"),
-            value: d->str("value"),
-        })
+        let p = parseJson(jsonStr, asObj(_, d => {
+            name: d->str("name", ()),
+            value: d->str("value", ()),
+        }, ()), ())
 
         //then
         switch p {
@@ -134,10 +142,10 @@ describe("Expln_utils_json.parseObjOpt", _ => {
         let jsonStr = `null`
 
         //when
-        let p = parseObjOpt(jsonStr, d => {
-            name: d->str("name"),
-            value: d->str("value"),
-        })
+        let p = parseJson(jsonStr, asObjOpt(_, d => {
+            name: d->str("name", ()),
+            value: d->str("value", ()),
+        }, ()), ())
 
         //then
         switch p {
@@ -153,9 +161,9 @@ describe("Expln_utils_json.asStrOpt", _ => {
         let jsonStr = `{"arr":["A",null,"B"]}`
 
         //when
-        let p = parseObj(jsonStr, d => {
-            "arr": d->arr("arr", asStrOpt),
-        })->Belt_Result.getExn
+        let p = parseJson(jsonStr, asObj(_, d => {
+            "arr": d->arr("arr", asStrOpt(_, ()), ()),
+        }, ()), ())->Belt_Result.getExn
 
         //then
         assertEq(p, {"arr":[Some("A"),None,Some("B")]})
@@ -168,9 +176,9 @@ describe("Expln_utils_json.asStr", _ => {
         let jsonStr = `{"arr":["A",null,"B"]}`
 
         //when
-        let p = parseObj(jsonStr, d => {
-            "arr": d->arr("arr", asStr),
-        })
+        let p = parseJson(jsonStr, asObj(_, d => {
+            "arr": d->arr("arr", asStr(_, ()), ()),
+        }, ()), ())
 
         //then
         assertEq(p, Error("Parse error: a string was expected at '/arr/1'."))
@@ -183,9 +191,9 @@ describe("Expln_utils_json.asNumOpt", _ => {
         let jsonStr = `{"arr":[23.8,null,41]}`
 
         //when
-        let p = parseObj(jsonStr, d => {
-            "arr": d->arr("arr", asNumOpt),
-        })->Belt_Result.getExn
+        let p = parseJson(jsonStr, asObj(_, d => {
+            "arr": d->arr("arr", asNumOpt(_, ()), ()),
+        }, ()), ())->Belt_Result.getExn
 
         //then
         assertEq(p, {"arr":[Some(23.8),None,Some(41.)]})
@@ -198,9 +206,9 @@ describe("Expln_utils_json.asNum", _ => {
         let jsonStr = `{"arr":[23.8,null,41]}`
 
         //when
-        let p = parseObj(jsonStr, d => {
-            "arr": d->arr("arr", asNum),
-        })
+        let p = parseJson(jsonStr, asObj(_, d => {
+            "arr": d->arr("arr", asNum(_, ()), ()),
+        }, ()), ())
 
         //then
         assertEq(p, Error("Parse error: a number was expected at '/arr/1'."))
@@ -213,9 +221,9 @@ describe("Expln_utils_json.asIntOpt", _ => {
         let jsonStr = `{"arr":[23.8,null,41]}`
 
         //when
-        let p = parseObj(jsonStr, d => {
-            "arr": d->arr("arr", asIntOpt),
-        })->Belt_Result.getExn
+        let p = parseJson(jsonStr, asObj(_, d => {
+            "arr": d->arr("arr", asIntOpt(_, ()), ()),
+        }, ()), ())->Belt_Result.getExn
 
         //then
         assertEq(p, {"arr":[Some(23),None,Some(41)]})
@@ -228,9 +236,9 @@ describe("Expln_utils_json.asInt", _ => {
         let jsonStr = `{"arr":[23.8,null,41]}`
 
         //when
-        let p = parseObj(jsonStr, d => {
-            "arr": d->arr("arr", asInt),
-        })
+        let p = parseJson(jsonStr, asObj(_, d => {
+            "arr": d->arr("arr", asInt(_, ()), ()),
+        }, ()), ())
 
         //then
         assertEq(p, Error("Parse error: an integer was expected at '/arr/1'."))
@@ -243,9 +251,9 @@ describe("Expln_utils_json.asBoolOpt", _ => {
         let jsonStr = `{"arr":[true,null,false]}`
 
         //when
-        let p = parseObj(jsonStr, d => {
-            "arr": d->arr("arr", asBoolOpt),
-        })->Belt_Result.getExn
+        let p = parseJson(jsonStr, asObj(_, d => {
+            "arr": d->arr("arr", asBoolOpt(_, ()), ()),
+        }, ()), ())->Belt_Result.getExn
 
         //then
         assertEq(p, {"arr":[Some(true),None,Some(false)]})
@@ -258,9 +266,9 @@ describe("Expln_utils_json.asBool", _ => {
         let jsonStr = `{"arr":[true,null,false]}`
 
         //when
-        let p = parseObj(jsonStr, d => {
-            "arr": d->arr("arr", asBool),
-        })
+        let p = parseJson(jsonStr, asObj(_, d => {
+            "arr": d->arr("arr", asBool(_, ()), ()),
+        }, ()), ())
 
         //then
         assertEq(p, Error("Parse error: a boolean was expected at '/arr/1'."))

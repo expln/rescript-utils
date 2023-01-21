@@ -2,8 +2,6 @@ let {exn} = module(Expln_utils_common)
 
 type path = list<string>
 
-type json = Js.Json.t
-
 type jsonAny = 
     | JsonNull(path)
     | JsonBool(bool, path)
@@ -34,10 +32,15 @@ let jsonToAny = (json,path):jsonAny => {
 }
     
 
-let getPath = jsonAny =>
+let getPath = jsonAny => {
     switch jsonAny {
         | JsonNull(path) | JsonBool(_,path) | JsonNum(_,path) | JsonStr(_,path) | JsonArr(_,path) | JsonObj(_,path) => path
     }
+}
+
+let pathToStr2 = (path,attrName) => pathToStr(list{attrName, ...path})
+
+let getLocation2 = (jsonAny,nextPathElem) => pathToStr2(getPath(jsonAny),nextPathElem)
 
 let anyToBool = (jsonAny):result<option<bool>,string> => {
     switch jsonAny {
@@ -79,6 +82,14 @@ let anyToArr = (jsonAny, mapper: jsonAny=>'a):result<option<array<'a>>,string> =
     }
 }
 
+let anyToObj = (jsonAny, mapper: jsonAny=>'a):result<option<'a>,string> => {
+    switch jsonAny {
+        | JsonNull(_) => Ok(None)
+        | JsonObj(_,_) => Ok(Some(mapper(jsonAny)))
+        | _ => Error(`an object was expected at '${jsonAny->getPath->pathToStr}'.`)
+    }
+}
+
 let getByPath = (obj:jsonAny, attrName: string):result<option<jsonAny>,string> => {
     switch obj {
         | JsonObj(dict,path) => {
@@ -91,129 +102,228 @@ let getByPath = (obj:jsonAny, attrName: string):result<option<jsonAny>,string> =
     }
 }
 
-let asValOpt = (
-    jsonAny, 
-    anyToVal:jsonAny=>result<option<'v>,string>, 
-    // validator:option<'v>=>result<option<'v>,string>,
-    // default:unit=>option<'v>
-): option<'v> => {
-    switch anyToVal(jsonAny) {
-        | Ok(valOpt) => valOpt
-        | Error(msg) => exn(msg)
+type anyToVal<'v> = jsonAny=>result<option<'v>,string>
+
+type validator<'v> = 'v => result<'v,string>
+type default<'v> = () => 'v
+type asVal<'v> = ((jsonAny, ~validator:validator<'v>=?, ~default:default<'v>=?, ())=>'v)
+type val<'v> = ((jsonAny, string, ~validator:validator<'v>=?, ~default:default<'v>=?, ())=>'v)
+
+let validate = (val:'v, validator:option<validator<'v>>):'v => {
+    switch validator {
+        | None => val
+        | Some(validator) => {
+            switch validator(val) {
+                | Ok(val) => val
+                | Error(msg) => exn(msg)
+            }
+        }
     }
 }
 
-let makeAsValOpt = (anyToVal:jsonAny=>result<option<'v>,string>):(jsonAny=>option<'v>) => 
-    jsonAny => asValOpt(jsonAny, anyToVal)
-
-let asVal = (jsonAny, anyToVal:jsonAny=>result<option<'v>,string>, descrOfExpectedValue:string): 'v => {
-    switch asValOpt(jsonAny, anyToVal) {
-        | Some(val) => val
-        | None => exn(`${descrOfExpectedValue} was expected at '${jsonAny->getPath->pathToStr}'.`)
+let getDefaultOrExn = (default:option<default<'v>>, errMsg:()=>string):'v => {
+    switch default {
+        | Some(default) => default()
+        | None => exn(errMsg())
     }
 }
 
-let makeAsVal = (anyToVal:jsonAny=>result<option<'v>,string>, descrOfExpectedValue:string):(jsonAny=>'v) => 
-    jsonAny => asVal(jsonAny, anyToVal, descrOfExpectedValue)
-
-let valOpt = (jsonAny:jsonAny, attrName:string, anyToVal:jsonAny=>result<option<'v>,string>): option<'v> => {
-    switch getByPath(jsonAny, attrName) {
-        | Ok(None) => None
-        | Ok(Some(attrVal)) => asValOpt(attrVal, anyToVal)
-        | Error(msg) => exn(msg)
+let makeAsValOpt = (anyToVal:anyToVal<'v>):asVal<option<'v>> => {
+    (jsonAny, ~validator=?, ~default=?, ()) => {
+        switch anyToVal(jsonAny) {
+            | Ok(valOpt) => validate(valOpt, validator)
+            | Error(msg) => getDefaultOrExn(default, ()=>msg)
+        }
     }
 }
 
-let makeValOpt = (anyToVal:jsonAny=>result<option<'v>,string>):((jsonAny,string)=>option<'v>) => 
-    (jsonAny, attrName) => valOpt(jsonAny, attrName, anyToVal)
-
-let val = (jsonAny, attrName, anyToVal:jsonAny=>result<option<'v>,string>, descrOfExpectedValue:string): 'v => {
-    switch valOpt(jsonAny, attrName, anyToVal) {
-        | Some(val) => val
-        | None => exn(`${descrOfExpectedValue} was expected at '${pathToStr(list{attrName, ...(jsonAny->getPath)})}'.`)
+let makeAsVal = (anyToVal:anyToVal<'v>, descrOfExpectedValue:string):asVal<'v> => {
+    (jsonAny, ~validator=?, ~default=?, ()) => {
+        switch anyToVal(jsonAny) {
+            | Ok(None) => getDefaultOrExn(default, ()=>`${descrOfExpectedValue} was expected at '${jsonAny->getPath->pathToStr}'.`)
+            | Ok(Some(val)) => validate(val, validator)
+            | Error(msg) => getDefaultOrExn(default, ()=>msg)
+        }
     }
 }
 
-let makeVal = (anyToVal:jsonAny=>result<option<'v>,string>, descrOfExpectedValue:string):((jsonAny,string)=>'v) => 
-    (jsonAny, attrName) => val(jsonAny, attrName, anyToVal, descrOfExpectedValue)
+let makeValOpt = (asValOpt:asVal<option<'v>>):val<option<'v>> => {
+    (jsonAny, attrName, ~validator=?, ~default=?, ()) => {
+        switch getByPath(jsonAny, attrName) {
+            | Ok(None) => validate(None, validator)
+            | Ok(Some(attrVal)) => asValOpt(attrVal, ~validator?, ~default?, ())
+            | Error(msg) => getDefaultOrExn(default, ()=>`an object was expected at '${jsonAny->getPath->pathToStr}'.`)
+        }
+    }
+}
+
+let makeVal = (asVal:asVal<'v>, descrOfExpectedValue:string):val<'v> => {
+    (jsonAny, attrName, ~validator=?, ~default=?, ()) => {
+        switch getByPath(jsonAny, attrName) {
+            | Ok(None) => getDefaultOrExn(default, ()=>`${descrOfExpectedValue} was expected at '${getLocation2(jsonAny, attrName)}'.`)
+            | Ok(Some(attrVal)) => asVal(attrVal, ~validator?, ~default?, ())
+            | Error(msg) => getDefaultOrExn(default, ()=>`an object was expected at '${jsonAny->getPath->pathToStr}'.`)
+        }
+    }
+}
 
 let asBoolOpt = makeAsValOpt(anyToBool)
 let asBool = makeAsVal(anyToBool, "a boolean")
-let boolOpt = makeValOpt(anyToBool)
-let bool = makeVal(anyToBool, "a boolean")
+let boolOpt = makeValOpt(asBoolOpt)
+let bool = makeVal(asBool, "a boolean")
 
 let asNumOpt = makeAsValOpt(anyToNum)
 let asNum = makeAsVal(anyToNum, "a number")
-let numOpt = makeValOpt(anyToNum)
-let num = makeVal(anyToNum, "a number")
+let numOpt = makeValOpt(asNumOpt)
+let num = makeVal(asNum, "a number")
 
 let asIntOpt = makeAsValOpt(anyToInt)
 let asInt = makeAsVal(anyToInt, "an integer")
-let intOpt = makeValOpt(anyToInt)
-let int = makeVal(anyToInt, "an integer")
+let intOpt = makeValOpt(asIntOpt)
+let int = makeVal(asInt, "an integer")
 
 let asStrOpt = makeAsValOpt(anyToStr)
 let asStr = makeAsVal(anyToStr, "a string")
-let strOpt = makeValOpt(anyToStr)
-let str = makeVal(anyToStr, "a string")
+let strOpt = makeValOpt(asStrOpt)
+let str = makeVal(asStr, "a string")
 
-let asArrOpt = (arr:jsonAny, mapper:jsonAny=>'a):option<array<'a>> => asValOpt(arr, anyToArr(_,mapper))
-let asArr = (arr:jsonAny, mapper:jsonAny=>'a):array<'a> => asVal(arr, anyToArr(_,mapper), "an array")
-let arrOpt = (obj:jsonAny, attrName:string, mapper:jsonAny => 'a):option<array<'a>> => valOpt(obj, attrName, anyToArr(_,mapper))
-let arr = (obj:jsonAny, attrName:string, mapper:jsonAny => 'a):array<'a> => val(obj, attrName, anyToArr(_,mapper), "an array")
-
-let objOpt = (obj:jsonAny, attrName:string, mapper:jsonAny => 'a):option<'a> => {
-    valOpt(
-        obj, 
-        attrName, 
-        attrVal => Ok(Some(mapper(attrVal)))
-    )
+let asArrOpt = (
+    arr:jsonAny, 
+    mapper:jsonAny=>'a, 
+    ~validator:option<validator<option<array<'a>>>>=?,
+    ~default:option<default<option<array<'a>>>>=?,
+    ()
+):option<array<'a>> => {
+    switch anyToArr(arr, mapper) {
+        | Ok(arrOpt) => validate(arrOpt, validator)
+        | Error(msg) => getDefaultOrExn(default, () => msg)
+    }
 }
 
-let obj = (obj:jsonAny, attrName:string, mapper:jsonAny => 'a):'a => {
-    val(
-        obj, 
-        attrName, 
-        attrVal => Ok(Some(mapper(attrVal))),
-        "an object"
-    )
+let asArr = (
+    arr:jsonAny, 
+    mapper:jsonAny=>'a, 
+    ~validator:option<validator<array<'a>>>=?,
+    ~default:option<default<array<'a>>>=?,
+    ()
+):array<'a> => {
+    switch anyToArr(arr, mapper) {
+        | Ok(None) => getDefaultOrExn(default, ()=>`an array was expected at '${arr->getPath->pathToStr}'.`)
+        | Ok(Some(arrVal)) => validate(arrVal, validator)
+        | Error(msg) => getDefaultOrExn(default, () => msg)
+    }
 }
 
-let parseObjOpt = (jsonStr:string, mapper:jsonAny=>'a):result<option<'a>,string> => {
+let arrOpt = (
+    obj:jsonAny, 
+    attrName:string,
+    mapper:jsonAny=>'a, 
+    ~validator:option<validator<option<array<'a>>>>=?,
+    ~default:option<default<option<array<'a>>>>=?,
+    ()
+):option<array<'a>> => {
+    switch getByPath(obj, attrName) {
+        | Ok(None) => validate(None, validator)
+        | Ok(Some(attrVal)) => asArrOpt(attrVal, mapper, ~validator?, ~default?, ())
+        | Error(msg) => getDefaultOrExn(default, ()=>`an object was expected at '${obj->getPath->pathToStr}'.`)
+    }
+}
+
+let arr = (
+    obj:jsonAny, 
+    attrName:string,
+    mapper:jsonAny=>'a, 
+    ~validator:option<validator<array<'a>>>=?,
+    ~default:option<default<array<'a>>>=?,
+    ()
+):array<'a> => {
+    switch getByPath(obj, attrName) {
+        | Ok(None) => getDefaultOrExn(default, ()=>`an array was expected at '${getLocation2(obj,attrName)}'.`)
+        | Ok(Some(attrVal)) => asArr(attrVal, mapper, ~validator?, ~default?, ())
+        | Error(msg) => getDefaultOrExn(default, ()=>`an object was expected at '${obj->getPath->pathToStr}'.`)
+    }
+}
+
+let asObjOpt = (
+    obj:jsonAny, 
+    mapper:jsonAny=>'a, 
+    ~validator:option<validator<option<'a>>>=?,
+    ~default:option<default<option<'a>>>=?,
+    ()
+):option<'a> => {
+    switch anyToObj(obj, mapper) {
+        | Ok(objOpt) => validate(objOpt, validator)
+        | Error(msg) => getDefaultOrExn(default, () => msg)
+    }
+}
+
+let asObj = (
+    arr:jsonAny, 
+    mapper:jsonAny=>'a, 
+    ~validator:option<validator<'a>>=?,
+    ~default:option<default<'a>>=?,
+    ()
+):'a => {
+    switch anyToObj(arr, mapper) {
+        | Ok(None) => getDefaultOrExn(default, ()=>`an object was expected at '${arr->getPath->pathToStr}'.`)
+        | Ok(Some(objVal)) => validate(objVal, validator)
+        | Error(msg) => getDefaultOrExn(default, () => msg)
+    }
+}
+
+let objOpt = (
+    obj:jsonAny, 
+    attrName:string,
+    mapper:jsonAny=>'a, 
+    ~validator:option<validator<option<'a>>>=?,
+    ~default:option<default<option<'a>>>=?,
+    ()
+):option<'a> => {
+    switch getByPath(obj, attrName) {
+        | Ok(None) => validate(None, validator)
+        | Ok(Some(attrVal)) => asObjOpt(attrVal, mapper, ~validator?, ~default?, ())
+        | Error(msg) => getDefaultOrExn(default, ()=>`an object was expected at '${obj->getPath->pathToStr}'.`)
+    }
+}
+
+let obj = (
+    obj:jsonAny, 
+    attrName:string,
+    mapper:jsonAny=>'a, 
+    ~validator:option<validator<'a>>=?,
+    ~default:option<default<'a>>=?,
+    ()
+):'a => {
+    switch getByPath(obj, attrName) {
+        | Ok(None) => getDefaultOrExn(default, ()=>`an object was expected at '${getLocation2(obj,attrName)}'.`)
+        | Ok(Some(attrVal)) => asObj(attrVal, mapper, ~validator?, ~default?, ())
+        | Error(msg) => getDefaultOrExn(default, ()=>`an object was expected at '${obj->getPath->pathToStr}'.`)
+    }
+}
+
+let parseJson = (
+    jsonStr:string, 
+    mapper:jsonAny=>'a, 
+    ~validator:option<validator<'a>>=?, 
+    ~default:option<default<'a>>=?, 
+    ()
+):result<'a,string> => {
     try {
-        switch jsonStr -> Js.Json.parseExn -> Js.Json.classify {
-            | Js_json.JSONNull => Ok(None)
-            | Js_json.JSONObject(dict) => Ok(Some(JsonObj(dict, rootPath) -> mapper))
-            | _ => exn(`an object was expected at '/'.`)
-        }
+        let jsonAny = jsonToAny(jsonStr->Js.Json.parseExn, rootPath)
+        Ok(validate(mapper(jsonAny), validator))
     } catch {
-        | ex =>
-            let msg = ex 
-                -> Js.Exn.asJsExn
-                -> Belt.Option.flatMap(Js.Exn.message)
-                -> Belt.Option.getWithDefault("no message was provided.")
-            Error("Parse error: " ++ msg)
-    }
-}
-
-let parseObjOptWithDefault = (jsonStr:string, mapper:jsonAny=>'a, default:unit=>option<'a>) => {
-    switch parseObjOpt(jsonStr, mapper) {
-        | Ok(res) => res
-        | Error(_) => default()
-    }
-}
-
-let parseObj = (jsonStr:string, mapper:jsonAny=>'a):result<'a,string> => 
-    switch parseObjOpt(jsonStr, mapper) {
-        | Ok(Some(obj)) => Ok(obj)
-        | Error(str) => Error(str)
-        | _ => Error(`Parse error: an object was expected at '/'.`)
-    }
-
-let parseObjWithDefault = (jsonStr:string, mapper:jsonAny=>'a, default:unit=>'a) => {
-    switch parseObj(jsonStr, mapper) {
-        | Ok(res) => res
-        | Error(_) => default()
+        | ex => {
+            switch default {
+                | Some(default) => Ok(default())
+                | None => {
+                    let msg = ex 
+                        -> Js.Exn.asJsExn
+                        -> Belt.Option.flatMap(Js.Exn.message)
+                        -> Belt.Option.getWithDefault("no message was provided.")
+                    Error("Parse error: " ++ msg)
+                }
+            }
+        }
     }
 }
 
