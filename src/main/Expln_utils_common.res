@@ -15,6 +15,22 @@ let arrForEach = (arr: array<'a>, consumer: 'a => option<'b>):option<'b> => {
     }
     res.contents
 }
+let arrJoin = (arr:array<'a>, sep:'a):array<'a> => {
+    let arrLen = arr->Js_array2.length
+    if (arrLen < 2) {
+        arr
+    } else {
+        let res = createArray(arrLen*2-1)
+        let maxI = arrLen - 1
+        for i in 0 to maxI {
+            res[2*i] = arr[i]
+            if (i != maxI) {
+                res[2*i+1] = sep
+            }
+        }
+        res
+    }
+}
 
 let copySubArray = (~src:array<'t>, ~srcFromIdx:int, ~dst:array<'t>, ~dstFromIdx:int, ~len:int): unit => {
     let s = ref(srcFromIdx)
