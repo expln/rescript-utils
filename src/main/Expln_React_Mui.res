@@ -9,6 +9,7 @@ module Col = Expln_React_Column
 module Dialog = Expln_React_Dialog
 module Divider = Expln_React_Divider
 module FormControl = Expln_React_FormControl
+module FormControlLabel = Expln_React_FormControlLabel
 module Grid = Expln_React_Grid
 module IconButton = Expln_React_IconButton
 module Input = Expln_React_Input
