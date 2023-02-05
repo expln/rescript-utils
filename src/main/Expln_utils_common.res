@@ -63,3 +63,26 @@ type explnUtilsException = {
     msg:string,
 }
 exception ExplnUtilsException(explnUtilsException)
+
+type comparator<'a> = ('a, 'a) => int
+
+let comparatorBy = (prop:'a=>int):comparator<'a> => {
+    (a,b) => {
+        if (prop(a) < prop(b)) {
+            -1
+        } else if (prop(a) == prop(b)) {
+            0
+        } else {
+            1
+        }
+    }
+}
+
+let comparatorAndThen = (cmp1:comparator<'a>, cmp2:comparator<'a>):comparator<'a> => {
+    (x,y) => {
+        switch cmp1(x,y) {
+            | 0 => cmp2(x,y)
+            | i => i
+        }
+    }
+}
