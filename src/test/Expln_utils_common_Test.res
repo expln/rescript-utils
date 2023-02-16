@@ -22,6 +22,18 @@ describe("comparatorBy", _ => {
     })
 })
 
+describe("comparatorInverse", _ => {
+    it("creates inverted comparator", _ => {
+        //given
+        let cmp1 = comparatorBy(a => a[1])->comparatorInverse
+
+        //when/then
+        assertEq(1, cmp1([1,30], [2,40]))
+        assertEq(0, cmp1([1,40], [2,40]))
+        assertEq(-1, cmp1([1,50], [2,40]))
+    })
+})
+
 describe("comparatorAndThen", _ => {
     it("produces correct results when two comparators are combined", _ => {
         //given

@@ -86,3 +86,5 @@ let comparatorAndThen = (cmp1:comparator<'a>, cmp2:comparator<'a>):comparator<'a
         }
     }
 }
+
+let comparatorInverse = (cmp:comparator<'a>):comparator<'a> => (x,y) => -cmp(x,y)
