@@ -68,9 +68,11 @@ type comparator<'a> = ('a, 'a) => int
 
 let comparatorBy = (prop:'a=>int):comparator<'a> => {
     (a,b) => {
-        if (prop(a) < prop(b)) {
+        let propA = prop(a)
+        let propB = prop(b)
+        if (propA < propB) {
             -1
-        } else if (prop(a) == prop(b)) {
+        } else if (propA == propB) {
             0
         } else {
             1
