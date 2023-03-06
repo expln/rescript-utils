@@ -4,4 +4,5 @@ open Expln_React_common
 external make: (
     ~control: reElem, 
     ~label: string, 
+    ~disabled: bool=?, 
 ) => reElem = "default"
