@@ -41,6 +41,17 @@ describe("hashArrInt", _ => {
     })
 })
 
+describe("hashArrIntFromTo", _ => {
+    it("produces 0 when 'from' is greater then 'to'", _ => {
+        assertEq( hashArrIntFromTo([1,2,3,4,5],100,90), 0)
+    })
+    it("produces same result as hashArrInt", _ => {
+        assertEq( hashArrIntFromTo([1,2,3,4,5,6],0,0), hashArrInt([1]))
+        assertEq( hashArrIntFromTo([1,2,3,4,5,6],1,2), hashArrInt([2,3]))
+        assertEq( hashArrIntFromTo([1,2,3,4,5,6],3,5), hashArrInt([4,5,6]))
+    })
+})
+
 describe("comparatorBy", _ => {
     it("produces correct comparators", _ => {
         //given

@@ -115,6 +115,17 @@ let hashArrInt: array<int> => int = %raw(`
     }
 `)
 
+let hashArrIntFromTo: (array<int>, int, int) => int = %raw(`
+    (arr,from,to) => {
+        let hash = 0;
+        for (let i = from; i <= to; i++) {
+            hash = ( ( hash << 5 ) - hash ) + arr[i];
+            hash |= 0;  // Convert to 32-bit integer
+        }
+        return hash;
+    }
+`)
+
 let hash2: (int, int) => int = %raw(`
     (a,b) => ( ( ( a << 5 ) - a ) + b ) | 0
 `)
