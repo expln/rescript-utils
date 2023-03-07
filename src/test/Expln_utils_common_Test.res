@@ -10,6 +10,37 @@ describe("arrJoin", _ => {
     })
 })
 
+describe("hash2", _ => {
+    it("produces 0 for two zeroes", _ => {
+        assertEq( hash2(0,0), 0)
+    })
+    it("produces non-zero for two non-zeroes", _ => {
+        assertEq( hash2(1,2), 33)
+    })
+})
+
+describe("hashStr", _ => {
+    it("produces 0 for an empty string", _ => {
+        assertEq( hashStr(""), 0)
+    })
+    it("produces non-zero for a non-empty string", _ => {
+        assertEq( hashStr("a"), 97)
+        assertEq( hashStr("ab"), 3105)
+        assertEq( hashStr("abc"), 96354)
+    })
+})
+
+describe("hashArrInt", _ => {
+    it("produces 0 for an empty array", _ => {
+        assertEq( hashArrInt([]), 0)
+    })
+    it("produces non-zero for a non-empty array", _ => {
+        assertEq( hashArrInt([1]), 1)
+        assertEq( hashArrInt([2,3]), 65)
+        assertEq( hashArrInt([4,5,6]), 4005)
+    })
+})
+
 describe("comparatorBy", _ => {
     it("produces correct comparators", _ => {
         //given

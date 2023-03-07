@@ -90,3 +90,31 @@ let comparatorAndThen = (cmp1:comparator<'a>, cmp2:comparator<'a>):comparator<'a
 }
 
 let comparatorInverse = (cmp:comparator<'a>):comparator<'a> => (x,y) => -cmp(x,y)
+
+//https://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript
+//https://stackoverflow.com/questions/194846/is-there-hash-code-function-accepting-any-object-type
+let hashStr: string => int = %raw(`
+    str => {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            hash = ( ( hash << 5 ) - hash ) + str.charCodeAt(i);
+            hash |= 0;  // Convert to 32-bit integer
+        }
+        return hash;
+    }
+`)
+
+let hashArrInt: array<int> => int = %raw(`
+    arr => {
+        let hash = 0;
+        for (let i = 0; i < arr.length; i++) {
+            hash = ( ( hash << 5 ) - hash ) + arr[i];
+            hash |= 0;  // Convert to 32-bit integer
+        }
+        return hash;
+    }
+`)
+
+let hash2: (int, int) => int = %raw(`
+    (a,b) => ( ( ( a << 5 ) - a ) + b ) | 0
+`)
