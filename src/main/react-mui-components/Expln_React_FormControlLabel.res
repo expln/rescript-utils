@@ -6,4 +6,5 @@ external make: (
     ~label: string, 
     ~disabled: bool=?, 
     ~style: reStyle=?,
+    ~value: string=?,
 ) => reElem = "default"
