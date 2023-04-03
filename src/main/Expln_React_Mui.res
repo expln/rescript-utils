@@ -31,6 +31,7 @@ module Slider = Expln_React_Slider
 module Tab = Expln_React_Tab
 module Tabs = Expln_React_Tabs
 module TextField = Expln_React_TextField
+module ThemeProvider = Expln_React_ThemeProvider
 
 module TextFileReader = Expln_React_TextFileReader
 

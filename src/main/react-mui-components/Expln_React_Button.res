@@ -6,5 +6,6 @@ external make: (
     ~onClick: reMouseHnd=?, 
     ~variant:variant=?, 
     ~disabled:bool=?,
+    ~color:string=?,
     ~children: reElem=?
 ) => reElem = "default"
