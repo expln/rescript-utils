@@ -6,7 +6,7 @@ let make = (~top:int=0, ~header:reElem, ~content:int=>reElem) => {
     let (contentTop, setContentTop) = React.useState(_ => top)
 
     let headerRef = React.useRef(Js.Nullable.null)
-    useClientHeightObserver(headerRef, headerHeight => setContentTop(_ => top + headerHeight))
+    useClientSizeObserver(headerRef, (_, headerHeight) => setContentTop(_ => top + headerHeight))
 
     <>
         <div 

@@ -1,1 +1,1 @@
-let useClientHeightObserver: (React.ref<Js.Nullable.t<Dom.element>>, int => unit) => unit
+let useClientSizeObserver: (React.ref<Js.Nullable.t<Dom.element>>, (int,int) => unit) => unit

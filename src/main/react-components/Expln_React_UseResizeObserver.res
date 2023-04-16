@@ -1,6 +1,6 @@
 @new external makeResizeObserver: (array<{..}> => unit) => {..} = "ResizeObserver"
 
-let useClientHeightObserver = (ref:React.ref<Js.Nullable.t<Dom.element>>, onClientHeightChange:int=>unit) => {
+let useClientSizeObserver = (ref:React.ref<Js.Nullable.t<Dom.element>>, onClientSizeChange:(int,int)=>unit) => {
     React.useEffect1(() => {
         switch ref.current->Js.Nullable.toOption {
             | Some(domElem) => {
@@ -8,9 +8,12 @@ let useClientHeightObserver = (ref:React.ref<Js.Nullable.t<Dom.element>>, onClie
                 let observer = makeResizeObserver(mutations => {
                     // Js.Console.log2("mutations", mutations)
                     if (mutations->Js.Array2.length != 0) {
-                        let clientHeight = mutations[mutations->Js.Array2.length - 1]["target"]["clientHeight"]
+                        let target = mutations[mutations->Js.Array2.length - 1]["target"]
+                        let clientWidth = target["clientWidth"]
+                        let clientHeight = target["clientHeight"]
+                        // Js.Console.log2("clientWidth", clientWidth)
                         // Js.Console.log2("clientHeight", clientHeight)
-                        onClientHeightChange(clientHeight)
+                        onClientSizeChange(clientWidth, clientHeight)
                     }
                 })
                 observer["observe"](. domElem)->ignore
