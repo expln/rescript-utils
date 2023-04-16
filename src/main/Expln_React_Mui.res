@@ -20,6 +20,7 @@ module ListItem = Expln_React_ListItem
 module ListItemButton = Expln_React_ListItemButton
 module ListItemIcon = Expln_React_ListItemIcon
 module ListItemText = Expln_React_ListItemText
+module Menu = Expln_React_Menu
 module MenuItem = Expln_React_MenuItem
 module Pagination = Expln_React_Pagination
 module Paper = Expln_React_Paper
