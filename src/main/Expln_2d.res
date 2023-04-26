@@ -8,61 +8,61 @@ type boundaries = {minX: float, minY: float, maxX: float, maxY: float}
 let ex = {begin:{x:0., y:0.}, end:{x:1., y:0.}}
 let ey = {begin:{x:0., y:0.}, end:{x:0., y:-1.}}
 
-let deg: float => angle = d => d /. 180. *. Js.Math._PI
-let rad: float => angle = r => r
-let toDeg: angle => float = a => a /. Js.Math._PI *. 180.
-let toRad: angle => float = a => a
+let deg = (d:float):angle => d /. 180. *. Js.Math._PI
+let rad = (r:float):angle => r
+let toDeg = (a:angle):float => a /. Js.Math._PI *. 180.
+let toRad = (a:angle):float => a
 
-let pntX: point => float = p => p.x
-let pntY: point => float = p => p.y
-let pntLen: point => float = p => Js.Math.sqrt(p.x *. p.x +. p.y *. p.y)
-let pntSub: (point,point) => point = (a,b) => {x: a.x -. b.x, y: a.y -. b.y}
-let pntAdd: (point,point) => point = (a,b) => {x: a.x +. b.x, y: a.y +. b.y}
-let pntTrDelta: (point,float,float) => point = (p,dx,dy) => {x: p.x +. dx, y: p.y +. dy}
-let pntTr: (point, vector) => point = (p,v) => p->pntTrDelta(v.end.x -. v.begin.x, v.end.y -. v.begin.y)
-let pntMult: (point, float) => point = (p, x) => {x: p.x *. x, y: p.y *. x}
-let pntDiv: (point, float) => point = (p, x) => {x: p.x /. x, y: p.y /. x}
-let pntVec: (point,point) => vector = (b,e) => {begin:b, end:e}
-let pntRot: (point, angle) => point = (p,a) => {
+let pntX = (p:point):float => p.x
+let pntY = (p:point):float => p.y
+let pntLen = (p:point):float => Js.Math.sqrt(p.x *. p.x +. p.y *. p.y)
+let pntSub = (a:point,b:point):point => {x: a.x -. b.x, y: a.y -. b.y}
+let pntAdd = (a:point,b:point):point => {x: a.x +. b.x, y: a.y +. b.y}
+let pntTrDelta = (p:point,dx:float,dy:float):point => {x: p.x +. dx, y: p.y +. dy}
+let pntTr = (p:point, v:vector):point => p->pntTrDelta(v.end.x -. v.begin.x, v.end.y -. v.begin.y)
+let pntMult = (p:point, x:float):point => {x: p.x *. x, y: p.y *. x}
+let pntDiv = (p:point, x:float):point => {x: p.x /. x, y: p.y /. x}
+let pntVec = (b:point,e:point):vector => {begin:b, end:e}
+let pntRot = (p:point, a:angle):point => {
     x: p.x *. Js.Math.cos(-.a) -. p.y *. Js.Math.sin(-.a),
     y: p.x *. Js.Math.sin(-.a) +. p.y *. Js.Math.cos(-.a),
 }
 
 
-let vecBegin: vector => point = v => v.begin
-let vecEnd: vector => point = v => v.end
-let vecLen: vector => float = v => v.end -> pntSub(v.begin) -> pntLen
-let vecMult: (vector, float) => vector = (v,x) => {begin: v.begin -> pntMult(x), end: v.end -> pntMult(x)}
-let vecMultVec: (vector, vector) => float = (v1, v2) => {
-    let a = v1.end -> pntSub(v1.begin)
-    let b = v2.end -> pntSub(v2.begin)
+let vecBegin = (v:vector):point => v.begin
+let vecEnd = (v:vector):point => v.end
+let vecLen = (v:vector):float => v.end->pntSub(v.begin)->pntLen
+let vecMult = (v:vector, x:float):vector => {begin: v.begin->pntMult(x), end: v.end->pntMult(x)}
+let vecMultVec = (v1:vector, v2:vector):float => {
+    let a = v1.end->pntSub(v1.begin)
+    let b = v2.end->pntSub(v2.begin)
     a.x *. b.x +. a.y *. b.y
 }
-let vecDiv: (vector, float) => vector = (v,x) => {begin: v.begin -> pntDiv(x), end: v.end -> pntDiv(x)}
-let vecAdd: (vector, vector) => vector = (a,b) => {begin: a.begin -> pntAdd(b.begin), end: a.end -> pntAdd(b.end)}
-let vecRot: (vector, angle) => vector = (v,a) => {
+let vecDiv = (v:vector, x:float):vector => {begin: v.begin->pntDiv(x), end: v.end->pntDiv(x)}
+let vecAdd = (a:vector, b:vector):vector => {begin: a.begin -> pntAdd(b.begin), end: a.end -> pntAdd(b.end)}
+let vecRot = (v:vector, a:angle):vector => {
     begin: v.begin,
     end: v.begin -> pntAdd(v.end -> pntSub(v.begin) -> pntRot(a))
 }
-let vecNorm: vector => vector = v => v -> vecDiv(v -> vecLen)
-let vecSwapEnds: vector => vector = v => {begin: v.end, end:v.begin}
-let vecBeginAt: (vector, point) => vector = (v,p) => {begin: p, end: p -> pntTr(v)}
-let vecEndAt: (vector, point) => vector = (v,p) => v -> vecSwapEnds -> vecBeginAt(p) -> vecSwapEnds
-let vecTrDelta: (vector, float, float) => vector = (v,dx,dy) => {
+let vecNorm = (v:vector):vector => v->vecDiv(v -> vecLen)
+let vecSwapEnds = (v:vector):vector => {begin: v.end, end:v.begin}
+let vecBeginAt = (v:vector, p:point):vector => {begin: p, end: p -> pntTr(v)}
+let vecEndAt = (v:vector, p:point):vector => v->vecSwapEnds->vecBeginAt(p)->vecSwapEnds
+let vecTrDelta = (v:vector, dx:float, dy:float):vector => {
     begin: v.begin->pntTrDelta(dx,dy),
     end: v.end->pntTrDelta(dx,dy)
 }
-let vecTr: (vector, vector) => vector = (v,t) => {
+let vecTr = (v:vector, t:vector):vector => {
     let dx = t.end.x -. t.begin.x
     let dy = t.end.y -. t.begin.y
-    v -> vecTrDelta(dx,dy)
+    v->vecTrDelta(dx,dy)
 }
-let vecTrDir: (vector, vector, float) => vector = (v,dir,x) => v -> vecTr(dir -> vecNorm -> vecMult(x))
+let vecTrDir = (v:vector, dir:vector, x:float):vector => v->vecTr(dir->vecNorm->vecMult(x))
 
-let pntTrDir: (point, vector, float) => point = (p, dir, dist) => p -> pntTr(dir -> vecNorm -> vecMult(dist))
-let vecRev: vector => vector = vecRot(_, deg(180.))
+let pntTrDir = (p:point, dir:vector, dist:float):point => p->pntTr(dir->vecNorm->vecMult(dist))
+let vecRev = (v:vector):vector => v->vecRot(deg(180.))
 
-let bndFromPoints: array<point> => boundaries = ps => {
+let bndFromPoints = (ps:array<point>):boundaries => {
     if (ps->Js.Array2.length == 0) {
         exn("Cannot create boudaries from an empty array of points.")
     }
@@ -79,26 +79,26 @@ let bndFromPoints: array<point> => boundaries = ps => {
     }
     {minX:minX.contents, minY:minY.contents, maxX:maxX.contents, maxY:maxY.contents}
 }
-let bndAddPoint: (boundaries,point) => boundaries = (b,p) => {
+let bndAddPoint = (b:boundaries, p:point):boundaries => {
     minX:Js.Math.min_float(b.minX,p.x),
     minY:Js.Math.min_float(b.minY,p.y),
     maxX:Js.Math.max_float(b.maxX,p.x),
     maxY:Js.Math.max_float(b.maxY,p.y),
 }
-let bndMerge: (boundaries,boundaries) => boundaries = (b1,b2) => {
+let bndMerge = (b1:boundaries, b2:boundaries):boundaries => {
     minX:Js.Math.min_float(b1.minX,b2.minX),
     minY:Js.Math.min_float(b1.minY,b2.minY),
     maxX:Js.Math.max_float(b1.maxX,b2.maxX),
     maxY:Js.Math.max_float(b1.maxY,b2.maxY),
 }
-let bndAddPoints: (boundaries,array<point>) => boundaries = (b,ps) => {
+let bndAddPoints = (b:boundaries, ps:array<point>):boundaries => {
     if (ps->Js.Array2.length == 0) {
         b
     } else {
         b->bndMerge(bndFromPoints(ps))
     }
 }
-let bndMergeAll: array<boundaries> => boundaries = bs => {
+let bndMergeAll = (bs:array<boundaries>):boundaries => {
     if (bs->Js.Array2.length == 0) {
         exn("Cannot merge empty array of boundaries.")
     } else {
@@ -109,11 +109,10 @@ let bndMergeAll: array<boundaries> => boundaries = bs => {
         b.contents
     }
 }
-let bndMinX: boundaries => float = b => b.minX
-let bndMinY: boundaries => float = b => b.minY
-let bndMaxX: boundaries => float = b => b.maxX
-let bndMaxY: boundaries => float = b => b.maxY
-let bndIncludes: (boundaries, point) => bool = (b,p) =>
-    b.minX <= p.x && p.x < b.maxX && b.minY <= p.y && p.y < b.maxY
-let bndWidth: boundaries => float = b => b.maxX -. b.minX
-let bndHeight: boundaries => float = b => b.maxY -. b.minY
+let bndMinX = (b:boundaries):float => b.minX
+let bndMinY = (b:boundaries):float => b.minY
+let bndMaxX = (b:boundaries):float => b.maxX
+let bndMaxY = (b:boundaries):float => b.maxY
+let bndIncludes = (b:boundaries, p:point):bool => b.minX <= p.x && p.x < b.maxX && b.minY <= p.y && p.y < b.maxY
+let bndWidth = (b:boundaries):float => b.maxX -. b.minX
+let bndHeight = (b:boundaries):float => b.maxY -. b.minY
