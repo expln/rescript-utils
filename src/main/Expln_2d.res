@@ -6,7 +6,7 @@ type angle = float
 type boundaries = {minX: float, minY: float, maxX: float, maxY: float}
 
 let ex = {begin:{x:0., y:0.}, end:{x:1., y:0.}}
-let ey = {begin:{x:0., y:0.}, end:{x:0., y:-1.}}
+let ey = {begin:{x:0., y:0.}, end:{x:0., y:1.}}
 
 let deg = (d:float):angle => d /. 180. *. Js.Math._PI
 let rad = (r:float):angle => r
@@ -24,8 +24,8 @@ let pntMult = (p:point, x:float):point => {x: p.x *. x, y: p.y *. x}
 let pntDiv = (p:point, x:float):point => {x: p.x /. x, y: p.y /. x}
 let pntVec = (b:point,e:point):vector => {begin:b, end:e}
 let pntRot = (p:point, a:angle):point => {
-    x: p.x *. Js.Math.cos(-.a) -. p.y *. Js.Math.sin(-.a),
-    y: p.x *. Js.Math.sin(-.a) +. p.y *. Js.Math.cos(-.a),
+    x: p.x *. Js.Math.cos(a) -. p.y *. Js.Math.sin(a),
+    y: p.x *. Js.Math.sin(a) +. p.y *. Js.Math.cos(a),
 }
 
 
@@ -42,7 +42,7 @@ let vecDiv = (v:vector, x:float):vector => {begin: v.begin->pntDiv(x), end: v.en
 let vecAdd = (a:vector, b:vector):vector => {begin: a.begin -> pntAdd(b.begin), end: a.end -> pntAdd(b.end)}
 let vecRot = (v:vector, a:angle):vector => {
     begin: v.begin,
-    end: v.begin -> pntAdd(v.end -> pntSub(v.begin) -> pntRot(a))
+    end: v.end->pntSub(v.begin)->pntRot(a)->pntAdd(v.begin)
 }
 let vecNorm = (v:vector):vector => v->vecDiv(v -> vecLen)
 let vecSwapEnds = (v:vector):vector => {begin: v.end, end:v.begin}
