@@ -32,13 +32,13 @@ let pntRot = (p:point, a:angle):point => {
 let vecBegin = (v:vector):point => v.begin
 let vecEnd = (v:vector):point => v.end
 let vecLen = (v:vector):float => v.end->pntSub(v.begin)->pntLen
-let vecMult = (v:vector, x:float):vector => {begin: v.begin->pntMult(x), end: v.end->pntMult(x)}
+let vecMult = (v:vector, x:float):vector => {begin: v.begin, end: v.end->pntSub(v.begin)->pntMult(x)->pntAdd(v.begin)}
 let vecMultVec = (v1:vector, v2:vector):float => {
     let a = v1.end->pntSub(v1.begin)
     let b = v2.end->pntSub(v2.begin)
     a.x *. b.x +. a.y *. b.y
 }
-let vecDiv = (v:vector, x:float):vector => {begin: v.begin->pntDiv(x), end: v.end->pntDiv(x)}
+let vecDiv = (v:vector, x:float):vector => {begin: v.begin, end: v.end->pntSub(v.begin)->pntDiv(x)->pntAdd(v.begin)}
 let vecAdd = (a:vector, b:vector):vector => {begin: a.begin -> pntAdd(b.begin), end: a.end -> pntAdd(b.end)}
 let vecRot = (v:vector, a:angle):vector => {
     begin: v.begin,
@@ -62,6 +62,13 @@ let vecTrDir = (v:vector, dir:vector, x:float):vector => v->vecTr(dir->vecNorm->
 let pntTrDir = (p:point, dir:vector, dist:float):point => p->pntTr(dir->vecNorm->vecMult(dist))
 let vecRev = (v:vector):vector => v->vecRot(deg(180.))
 
+let bndMinX = (b:boundaries):float => b.minX
+let bndMinY = (b:boundaries):float => b.minY
+let bndMaxX = (b:boundaries):float => b.maxX
+let bndMaxY = (b:boundaries):float => b.maxY
+let bndIncludes = (b:boundaries, p:point):bool => b.minX <= p.x && p.x < b.maxX && b.minY <= p.y && p.y < b.maxY
+let bndWidth = (b:boundaries):float => b.maxX -. b.minX
+let bndHeight = (b:boundaries):float => b.maxY -. b.minY
 let bndFromPoints = (ps:array<point>):boundaries => {
     if (ps->Js.Array2.length == 0) {
         exn("Cannot create boudaries from an empty array of points.")
@@ -76,6 +83,26 @@ let bndFromPoints = (ps:array<point>):boundaries => {
         minY := Js.Math.min_float(minY.contents, p.y)
         maxX := Js.Math.max_float(maxX.contents, p.x)
         maxY := Js.Math.max_float(maxY.contents, p.y)
+    }
+    {minX:minX.contents, minY:minY.contents, maxX:maxX.contents, maxY:maxY.contents}
+}
+let bndFromVectors = (vs:array<vector>): boundaries => {
+    if (vs->Js.Array2.length == 0) {
+        exn("Cannot create boudaries from an empty array of vectors.")
+    }
+    let p1 = vs[0]->vecBegin
+    let p2 = vs[0]->vecEnd
+    let minX = ref(Js.Math.min_float(p1.x, p2.x))
+    let minY = ref(Js.Math.min_float(p1.y, p2.y))
+    let maxX = ref(Js.Math.max_float(p1.x, p2.x))
+    let maxY = ref(Js.Math.max_float(p1.y, p2.y))
+    for i in 1 to vs->Js.Array2.length - 1 {
+        let p1 = vs[i]->vecBegin
+        let p2 = vs[i]->vecEnd
+        minX := Js.Math.min_float(minX.contents, Js.Math.min_float(p1.x, p2.x))
+        minY := Js.Math.min_float(minY.contents, Js.Math.min_float(p1.y, p2.y))
+        maxX := Js.Math.max_float(maxX.contents, Js.Math.max_float(p1.x, p2.x))
+        maxY := Js.Math.max_float(maxY.contents, Js.Math.max_float(p1.y, p2.y))
     }
     {minX:minX.contents, minY:minY.contents, maxX:maxX.contents, maxY:maxY.contents}
 }
@@ -98,6 +125,11 @@ let bndAddPoints = (b:boundaries, ps:array<point>):boundaries => {
         b->bndMerge(bndFromPoints(ps))
     }
 }
+let bndAddMarginPct = (b:boundaries,pct:float):boundaries => {
+    let size = Js_math.max_float(b->bndWidth, b->bndHeight)
+    let margin = size *. pct
+    {minX: b.minX -. margin, minY: b.minY -. margin, maxX: b.maxX +. margin, maxY: b.maxY +. margin}
+}
 let bndMergeAll = (bs:array<boundaries>):boundaries => {
     if (bs->Js.Array2.length == 0) {
         exn("Cannot merge empty array of boundaries.")
@@ -109,10 +141,3 @@ let bndMergeAll = (bs:array<boundaries>):boundaries => {
         b.contents
     }
 }
-let bndMinX = (b:boundaries):float => b.minX
-let bndMinY = (b:boundaries):float => b.minY
-let bndMaxX = (b:boundaries):float => b.maxX
-let bndMaxY = (b:boundaries):float => b.maxY
-let bndIncludes = (b:boundaries, p:point):bool => b.minX <= p.x && p.x < b.maxX && b.minY <= p.y && p.y < b.maxY
-let bndWidth = (b:boundaries):float => b.maxX -. b.minX
-let bndHeight = (b:boundaries):float => b.maxY -. b.minY

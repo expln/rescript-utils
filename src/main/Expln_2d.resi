@@ -41,8 +41,10 @@ let vecTr: (vector, vector) => vector
 let vecTrDir: (vector, vector, float) => vector
 
 let bndFromPoints: array<point> => boundaries
+let bndFromVectors: array<vector> => boundaries
 let bndAddPoint: (boundaries,point) => boundaries
 let bndAddPoints: (boundaries,array<point>) => boundaries
+let bndAddMarginPct: (boundaries,float) => boundaries
 let bndMerge: (boundaries,boundaries) => boundaries
 let bndMergeAll: array<boundaries> => boundaries
 let bndMinX: boundaries => float
