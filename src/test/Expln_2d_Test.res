@@ -2,7 +2,7 @@ let {describe, it, assertEq, assertEqMsg, assertEqNumMsg} = module(Expln_test)
 open Expln_2D.Std2D
 
 type pnt = {x: float, y: float}
-let mkp = p => ex->vecMult(p.x)->vecAdd(ey->vecMult(p.y))->vecEnd
+let mkp = p => ex->vecMul(p.x)->vecAdd(ey->vecMul(p.y))->vecEnd
 type vec = {begin:pnt, end:pnt}
 let mkv = (v:vec) => pntVec(v.begin->mkp, v.end->mkp)
 
@@ -63,8 +63,8 @@ describe("Expln_2d", _ => {
             "pntTrDir"
         )
 
-        //let pntMult: (point, float) => point
-        assertEqPnt({x:-6., y:9.}->mkp -> pntMult(2.), {x:-12., y:18.}->mkp, "pntMult")
+        //let pntMul: (point, float) => point
+        assertEqPnt({x:-6., y:9.}->mkp -> pntMul(2.), {x:-12., y:18.}->mkp, "pntMul")
 
         //let pntDiv: (point, float) => point
         assertEqPnt({x:-12., y:18.}->mkp -> pntDiv(2.), {x:-6., y:9.}->mkp, "pntDiv")
@@ -91,11 +91,11 @@ describe("Expln_2d", _ => {
         //let vecRev: vector => vector
         assertEqVec(testVec->vecRev, {begin:{x:3., y:4.}, end:{x:0., y:0.}}->mkv, "vecRev")
 
-        //let vecMult: (vector, float) => vector
-        assertEqVec(testVec->vecMult(3.), {begin:{x:3., y:4.}, end:{x:12., y:16.}}->mkv, "vecMult")
+        //let vecMul: (vector, float) => vector
+        assertEqVec(testVec->vecMul(3.), {begin:{x:3., y:4.}, end:{x:12., y:16.}}->mkv, "vecMul")
 
-        //let vecMultVec: (vector, vector) => float
-        assertEqNum(testVec->vecRot(deg(60.))->vecMultVec(testVec), 12.5, "vecMultVec")
+        //let vecMulVec: (vector, vector) => float
+        assertEqNum(testVec->vecRot(deg(60.))->vecMulVec(testVec), 12.5, "vecMulVec")
 
         //let vecDiv: (vector, float) => vector
         assertEqVec(testVec->vecDiv(2.), {begin:{x:3., y:4.}, end:{x:4.5, y:6.}}->mkv, "vecDiv")
@@ -168,7 +168,7 @@ describe("boundaries", _ => {
         assertEqNum(b->bndMaxX, 1., "bndFromVectors.b2.MaxX")
         assertEqNum(b->bndMinY, 0., "bndFromVectors.b2.MinY")
         assertEqNum(b->bndMaxY, 1., "bndFromVectors.b2.MaxY")
-        let b = bndFromVectors([ex->vecBeginAt(mkp({x:1., y:1.}))->vecMult(3.),ey->vecBeginAt(mkp({x:1., y:1.}))->vecMult(3.)])
+        let b = bndFromVectors([ex->vecBeginAt(mkp({x:1., y:1.}))->vecMul(3.),ey->vecBeginAt(mkp({x:1., y:1.}))->vecMul(3.)])
         assertEqNum(b->bndMinX, 1., "bndFromVectors.b3.MinX")
         assertEqNum(b->bndMaxX, 4., "bndFromVectors.b3.MaxX")
         assertEqNum(b->bndMinY, 1., "bndFromVectors.b3.MinY")

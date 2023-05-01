@@ -21,7 +21,7 @@ module type Utils2D = {
     let pntAdd: (point,point) => point
     let pntTr: (point, vector) => point
     let pntTrDir: (point, vector, float) => point
-    let pntMult: (point, float) => point
+    let pntMul: (point, float) => point
     let pntDiv: (point, float) => point
     let pntVec: (point,point) => vector
     let pntRot: (point, angle) => point
@@ -30,8 +30,8 @@ module type Utils2D = {
     let vecEnd: vector => point
     let vecLen: vector => float
     let vecRev: vector => vector
-    let vecMult: (vector, float) => vector
-    let vecMultVec: (vector, vector) => float
+    let vecMul: (vector, float) => vector
+    let vecMulVec: (vector, vector) => float
     let vecDiv: (vector, float) => vector
     let vecAdd: (vector, vector) => vector
     let vecRot: (vector, angle) => vector
@@ -91,7 +91,7 @@ module Std2D: Utils2D = {
     let pntAdd = (a:point,b:point):point => {x: a.x +. b.x, y: a.y +. b.y}
     let pntTrDelta = (p:point,dx:float,dy:float):point => {x: p.x +. dx, y: p.y +. dy}
     let pntTr = (p:point, v:vector):point => p->pntTrDelta(v.end.x -. v.begin.x, v.end.y -. v.begin.y)
-    let pntMult = (p:point, x:float):point => {x: p.x *. x, y: p.y *. x}
+    let pntMul = (p:point, x:float):point => {x: p.x *. x, y: p.y *. x}
     let pntDiv = (p:point, x:float):point => {x: p.x /. x, y: p.y /. x}
     let pntVec = (b:point,e:point):vector => {begin:b, end:e}
     let pntRot = (p:point, a:angle):point => {
@@ -103,8 +103,8 @@ module Std2D: Utils2D = {
     let vecBegin = (v:vector):point => v.begin
     let vecEnd = (v:vector):point => v.end
     let vecLen = (v:vector):float => v.end->pntSub(v.begin)->pntLen
-    let vecMult = (v:vector, x:float):vector => {begin: v.begin, end: v.end->pntSub(v.begin)->pntMult(x)->pntAdd(v.begin)}
-    let vecMultVec = (v1:vector, v2:vector):float => {
+    let vecMul = (v:vector, x:float):vector => {begin: v.begin, end: v.end->pntSub(v.begin)->pntMul(x)->pntAdd(v.begin)}
+    let vecMulVec = (v1:vector, v2:vector):float => {
         let a = v1.end->pntSub(v1.begin)
         let b = v2.end->pntSub(v2.begin)
         a.x *. b.x +. a.y *. b.y
@@ -128,8 +128,8 @@ module Std2D: Utils2D = {
         let dy = t.end.y -. t.begin.y
         v->vecTrDelta(dx,dy)
     }
-    let vecTrDir = (v:vector, dir:vector, dist:float):vector => v->vecTr(dir->vecNorm->vecMult(dist))
-    let pntTrDir = (p:point, dir:vector, dist:float):point => p->pntTr(dir->vecNorm->vecMult(dist))
+    let vecTrDir = (v:vector, dir:vector, dist:float):vector => v->vecTr(dir->vecNorm->vecMul(dist))
+    let pntTrDir = (p:point, dir:vector, dist:float):point => p->pntTr(dir->vecNorm->vecMul(dist))
     let vecRev = (v:vector):vector => v->vecRot(rad(Js_math._PI))
 
     let bndMinX = (b:boundaries):float => b.minX
@@ -267,7 +267,7 @@ module Svg2D: Utils2D = {
     let pntSub = Std2D.pntSub
     let pntAdd = Std2D.pntAdd
     let pntTr = Std2D.pntTr
-    let pntMult = Std2D.pntMult
+    let pntMul = Std2D.pntMul
     let pntDiv = Std2D.pntDiv
     let pntVec = Std2D.pntVec
     let pntRot = Std2D.pntRot
@@ -275,8 +275,8 @@ module Svg2D: Utils2D = {
     let vecBegin = Std2D.vecBegin
     let vecEnd = Std2D.vecEnd
     let vecLen = Std2D.vecLen
-    let vecMult = Std2D.vecMult
-    let vecMultVec = Std2D.vecMultVec
+    let vecMul = Std2D.vecMul
+    let vecMulVec = Std2D.vecMulVec
     let vecDiv = Std2D.vecDiv
     let vecAdd = Std2D.vecAdd
     let vecRot = Std2D.vecRot
