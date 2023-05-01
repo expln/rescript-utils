@@ -44,7 +44,19 @@ let bndFromPoints: array<point> => boundaries
 let bndFromVectors: array<vector> => boundaries
 let bndAddPoint: (boundaries,point) => boundaries
 let bndAddPoints: (boundaries,array<point>) => boundaries
-let bndAddMarginPct: (boundaries,float) => boundaries
+let bndLeftBottom: boundaries => point
+let bndLeftTop: boundaries => point
+let bndRightBottom: boundaries => point
+let bndRightTop: boundaries => point
+let bndAddMarginPct: (
+    boundaries, 
+    ~all:float=?,
+    ~left:float=?,
+    ~right:float=?,
+    ~top:float=?,
+    ~bottom:float=?,
+    ()
+) => boundaries
 let bndMerge: (boundaries,boundaries) => boundaries
 let bndMergeAll: array<boundaries> => boundaries
 let bndMinX: boundaries => float

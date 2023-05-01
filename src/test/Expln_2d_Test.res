@@ -4,7 +4,7 @@ open Expln_2d
 type pnt = {x: float, y: float}
 let mkp = p => ex->vecMult(p.x)->vecAdd(ey->vecMult(p.y))->vecEnd
 type vec = {begin:pnt, end:pnt}
-let mkv = v => pntVec(v.begin->mkp, v.end->mkp)
+let mkv = (v:vec) => pntVec(v.begin->mkp, v.end->mkp)
 
 let precision = 0.000001
 
@@ -174,12 +174,25 @@ describe("boundaries", _ => {
         assertEqNum(b->bndMinY, 1., "bndFromVectors.b3.MinY")
         assertEqNum(b->bndMaxY, 4., "bndFromVectors.b3.MaxY")
 
+        //boundaries corners
+        let b = bndFromPoints([mkp({x:5., y:11.}), mkp({x:100., y:80.})])
+        assertEqPnt(b->bndLeftBottom, mkp({x:5., y:11.}), "bndLeftBottom")
+        assertEqPnt(b->bndLeftTop, mkp({x:5., y:80.}), "bndLeftTop")
+        assertEqPnt(b->bndRightBottom, mkp({x:100., y:11.}), "bndRightBottom")
+        assertEqPnt(b->bndRightTop, mkp({x:100., y:80.}), "bndRightTop")
+
         //bndAddMarginPct
-        let b = bndFromPoints([mkp({x:0., y:0.}), mkp({x:100., y:80.})])->bndAddMarginPct(0.1)
-        assertEqNum(b->bndMinX, -10., "bndAddMarginPct.MinX")
-        assertEqNum(b->bndMaxX, 110., "bndAddMarginPct.MaxX")
-        assertEqNum(b->bndMinY, -10., "bndAddMarginPct.MinY")
-        assertEqNum(b->bndMaxY, 90., "bndAddMarginPct.MaxY")
+        let b = bndFromPoints([mkp({x:0., y:0.}), mkp({x:100., y:80.})])->bndAddMarginPct(~all=0.1, ())
+        assertEqNum(b->bndMinX, -10., "bndAddMarginPct.all.MinX")
+        assertEqNum(b->bndMaxX, 110., "bndAddMarginPct.all.MaxX")
+        assertEqNum(b->bndMinY, -10., "bndAddMarginPct.all.MinY")
+        assertEqNum(b->bndMaxY, 90., "bndAddMarginPct.all.MaxY")
+        let b = bndFromPoints([mkp({x:0., y:0.}), mkp({x:100., y:200.})])
+            ->bndAddMarginPct(~left=0.1, ~right=0.2, ~top=0.3, ~bottom=0.4, ())
+        assertEqNum(b->bndMinX, -10., "bndAddMarginPct.notAll.MinX")
+        assertEqNum(b->bndMaxX, 120., "bndAddMarginPct.notAll.MaxX")
+        assertEqNum(b->bndMinY, -80., "bndAddMarginPct.notAll.MinY")
+        assertEqNum(b->bndMaxY, 260., "bndAddMarginPct.notAll.MaxY")
 
         //let bndAddPoint: (boundaries,point) => boundaries
         let b = bndFromPoints([mkp({x:4., y:11.}), mkp({x:-14., y:-110.})])

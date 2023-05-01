@@ -124,10 +124,44 @@ let bndAddPoints = (b:boundaries, ps:array<point>):boundaries => {
         b->bndMerge(bndFromPoints(ps))
     }
 }
-let bndAddMarginPct = (b:boundaries,pct:float):boundaries => {
-    let size = Js_math.max_float(b->bndWidth, b->bndHeight)
-    let margin = size *. pct
-    {minX: b.minX -. margin, minY: b.minY -. margin, maxX: b.maxX +. margin, maxY: b.maxY +. margin}
+let bndLeftBottom = (b:boundaries):point => {
+    {x:b.minX, y:b.minY}
+}
+let bndLeftTop = (b:boundaries):point => {
+    {x:b.minX, y:b.maxY}
+}
+let bndRightBottom = (b:boundaries):point => {
+    {x:b.maxX, y:b.minY}
+}
+let bndRightTop = (b:boundaries):point => {
+    {x:b.maxX, y:b.maxY}
+}
+let bndAddMarginPct = (
+    b:boundaries, 
+    ~all:option<float>=?,
+    ~left:option<float>=?,
+    ~right:option<float>=?,
+    ~top:option<float>=?,
+    ~bottom:option<float>=?,
+    ()
+):boundaries => {
+    switch all {
+        | Some(allPct) => {
+            let size = Js_math.max_float(b->bndWidth, b->bndHeight)
+            let margin = size *. allPct
+            {minX: b.minX -. margin, minY: b.minY -. margin, maxX: b.maxX +. margin, maxY: b.maxY +. margin}
+        }
+        | None => {
+            let w = b->bndWidth
+            let h = b->bndHeight
+            {
+                minX: b.minX -. w *. left->Belt_Option.getWithDefault(0.),
+                minY: b.minY -. h *. bottom->Belt_Option.getWithDefault(0.),
+                maxX: b.maxX +. w *. right->Belt_Option.getWithDefault(0.),
+                maxY: b.maxY +. h *. top->Belt_Option.getWithDefault(0.),
+            }
+        }
+    }
 }
 let bndMergeAll = (bs:array<boundaries>):boundaries => {
     if (bs->Js.Array2.length == 0) {
