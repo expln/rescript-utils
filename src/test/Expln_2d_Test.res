@@ -1,5 +1,5 @@
 let {describe, it, assertEq, assertEqMsg, assertEqNumMsg} = module(Expln_test)
-open Expln_2d
+open Expln_2D.Std2D
 
 type pnt = {x: float, y: float}
 let mkp = p => ex->vecMult(p.x)->vecAdd(ey->vecMult(p.y))->vecEnd
