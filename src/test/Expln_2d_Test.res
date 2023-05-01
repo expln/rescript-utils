@@ -194,6 +194,19 @@ describe("boundaries", _ => {
         assertEqNum(b->bndMinY, -80., "bndAddMarginPct.notAll.MinY")
         assertEqNum(b->bndMaxY, 260., "bndAddMarginPct.notAll.MaxY")
 
+        //bndAddMargin
+        let b = bndFromPoints([mkp({x:0., y:0.}), mkp({x:100., y:80.})])->bndAddMargin(~all=5., ())
+        assertEqNum(b->bndMinX, -5., "bndAddMargin.all.MinX")
+        assertEqNum(b->bndMaxX, 105., "bndAddMargin.all.MaxX")
+        assertEqNum(b->bndMinY, -5., "bndAddMargin.all.MinY")
+        assertEqNum(b->bndMaxY, 85., "bndAddMargin.all.MaxY")
+        let b = bndFromPoints([mkp({x:0., y:0.}), mkp({x:100., y:200.})])
+            ->bndAddMargin(~left=1., ~right=2., ~top=3., ~bottom=4., ())
+        assertEqNum(b->bndMinX, -1., "bndAddMargin.notAll.MinX")
+        assertEqNum(b->bndMaxX, 102., "bndAddMargin.notAll.MaxX")
+        assertEqNum(b->bndMinY, -4., "bndAddMargin.notAll.MinY")
+        assertEqNum(b->bndMaxY, 203., "bndAddMargin.notAll.MaxY")
+
         //let bndAddPoint: (boundaries,point) => boundaries
         let b = bndFromPoints([mkp({x:4., y:11.}), mkp({x:-14., y:-110.})])
         assertEqNum(b->bndMinX, -14., "bndAddPoint.bndFromPoints.MinX")

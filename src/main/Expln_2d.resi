@@ -48,6 +48,15 @@ module type Utils2D = {
     let bndLeftTop: boundaries => point
     let bndRightBottom: boundaries => point
     let bndRightTop: boundaries => point
+    let bndAddMargin: (
+        boundaries, 
+        ~all:float=?,
+        ~left:float=?,
+        ~right:float=?,
+        ~top:float=?,
+        ~bottom:float=?,
+        ()
+    ) => boundaries
     let bndAddMarginPct: (
         boundaries, 
         ~all:float=?,

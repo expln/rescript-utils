@@ -50,6 +50,15 @@ module type Utils2D = {
     let bndLeftTop: boundaries => point
     let bndRightBottom: boundaries => point
     let bndRightTop: boundaries => point
+    let bndAddMargin: (
+        boundaries, 
+        ~all:float=?,
+        ~left:float=?,
+        ~right:float=?,
+        ~top:float=?,
+        ~bottom:float=?,
+        ()
+    ) => boundaries
     let bndAddMarginPct: (
         boundaries, 
         ~all:float=?,
@@ -207,6 +216,29 @@ module Std2D: Utils2D = {
     let bndRightTop = (b:boundaries):point => {
         {x:b.maxX, y:b.maxY}
     }
+    let bndAddMargin = (
+        b:boundaries, 
+        ~all:option<float>=?,
+        ~left:option<float>=?,
+        ~right:option<float>=?,
+        ~top:option<float>=?,
+        ~bottom:option<float>=?,
+        ()
+    ):boundaries => {
+        switch all {
+            | Some(margin) => {
+                { minX: b.minX -. margin, minY: b.minY -. margin, maxX: b.maxX +. margin, maxY: b.maxY +. margin }
+            }
+            | None => {
+                {
+                    minX: b.minX -. left->Belt_Option.getWithDefault(0.),
+                    minY: b.minY -. bottom->Belt_Option.getWithDefault(0.),
+                    maxX: b.maxX +. right->Belt_Option.getWithDefault(0.),
+                    maxY: b.maxY +. top->Belt_Option.getWithDefault(0.),
+                }
+            }
+        }
+    }
     let bndAddMarginPct = (
         b:boundaries, 
         ~all:option<float>=?,
@@ -305,6 +337,15 @@ module Svg2D: Utils2D = {
     let bndLeftTop = Std2D.bndLeftBottom
     let bndRightBottom = Std2D.bndRightTop
     let bndRightTop = Std2D.bndRightBottom
+    let bndAddMargin = (
+        b:boundaries, 
+        ~all:option<float>=?,
+        ~left:option<float>=?,
+        ~right:option<float>=?,
+        ~top:option<float>=?,
+        ~bottom:option<float>=?,
+        ()
+    ):boundaries => Std2D.bndAddMargin( b, ~all=?all, ~left=?left, ~right=?right, ~top=?bottom, ~bottom=?top, () )
     let bndAddMarginPct = (
         b:boundaries, 
         ~all:option<float>=?,
