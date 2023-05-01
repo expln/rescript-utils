@@ -39,12 +39,12 @@ let vecMultVec = (v1:vector, v2:vector):float => {
     a.x *. b.x +. a.y *. b.y
 }
 let vecDiv = (v:vector, x:float):vector => {begin: v.begin, end: v.end->pntSub(v.begin)->pntDiv(x)->pntAdd(v.begin)}
-let vecAdd = (a:vector, b:vector):vector => {begin: a.begin -> pntAdd(b.begin), end: a.end -> pntAdd(b.end)}
+let vecAdd = (a:vector, b:vector):vector => {begin: a.begin, end: a.end->pntAdd(b.end->pntSub(b.begin))}
 let vecRot = (v:vector, a:angle):vector => {
     begin: v.begin,
     end: v.end->pntSub(v.begin)->pntRot(a)->pntAdd(v.begin)
 }
-let vecNorm = (v:vector):vector => v->vecDiv(v -> vecLen)
+let vecNorm = (v:vector):vector => v->vecDiv(v->vecLen)
 let vecSwapEnds = (v:vector):vector => {begin: v.end, end:v.begin}
 let vecBeginAt = (v:vector, p:point):vector => {begin: p, end: p -> pntTr(v)}
 let vecEndAt = (v:vector, p:point):vector => v->vecSwapEnds->vecBeginAt(p)->vecSwapEnds
@@ -57,10 +57,9 @@ let vecTr = (v:vector, t:vector):vector => {
     let dy = t.end.y -. t.begin.y
     v->vecTrDelta(dx,dy)
 }
-let vecTrDir = (v:vector, dir:vector, x:float):vector => v->vecTr(dir->vecNorm->vecMult(x))
-
+let vecTrDir = (v:vector, dir:vector, dist:float):vector => v->vecTr(dir->vecNorm->vecMult(dist))
 let pntTrDir = (p:point, dir:vector, dist:float):point => p->pntTr(dir->vecNorm->vecMult(dist))
-let vecRev = (v:vector):vector => v->vecRot(deg(180.))
+let vecRev = (v:vector):vector => v->vecRot(rad(Js_math._PI))
 
 let bndMinX = (b:boundaries):float => b.minX
 let bndMinY = (b:boundaries):float => b.minY

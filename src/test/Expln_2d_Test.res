@@ -103,7 +103,7 @@ describe("Expln_2d", _ => {
         //let vecAdd: (vector, vector) => vector
         assertEqVec(
             testVec->vecAdd({begin:{x:3., y:4.}, end:{x:6., y:8.}}->mkv),
-            {begin:{x:6., y:8.}, end:{x:12., y:16.}}->mkv,
+            {begin:{x:3., y:4.}, end:{x:9., y:12.}}->mkv,
             "vecAdd"
         )
 
