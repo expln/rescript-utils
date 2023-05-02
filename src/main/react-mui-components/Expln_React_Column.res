@@ -5,12 +5,12 @@ let make = (
     ~gridRef:option<ReactDOM.domRef>=?,
     ~justifyContent:option<Expln_React_Grid.justifyContent>=?,
     ~alignItems:option<Expln_React_Grid.alignItems>=?,
-    ~spacing:option<float>=?,
+    ~spacing:float=1.,
     ~style:option<reStyle>=?,
     ~childXsOffset:option<int=>option<Js.Json.t>>=?,
     ~children:option<reElem>=?
 ) => {
-    <Expln_React_Grid ref=?gridRef container=true direction=#column ?justifyContent ?alignItems ?spacing ?style >
+    <Expln_React_Grid ref=?gridRef container=true direction=#column ?justifyContent ?alignItems spacing ?style >
         {switch children {
             | Some(children) => 
                 children->React.Children.mapWithIndex((child,i) => {
