@@ -4,6 +4,7 @@ module AccordionDetails = Expln_React_AccordionDetails
 module AccordionSummary = Expln_React_AccordionSummary
 module Box = Expln_React_Box
 module Button = Expln_React_Button
+module ButtonGroup = Expln_React_ButtonGroup
 module Checkbox = Expln_React_Checkbox
 module Col = Expln_React_Column
 module Dialog = Expln_React_Dialog

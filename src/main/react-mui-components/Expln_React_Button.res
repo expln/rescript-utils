@@ -7,5 +7,6 @@ external make: (
     ~variant:variant=?, 
     ~disabled:bool=?,
     ~color:string=?,
+    ~title:string=?,
     ~children: reElem=?
 ) => reElem = "default"
