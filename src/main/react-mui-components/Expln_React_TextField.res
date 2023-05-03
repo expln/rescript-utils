@@ -5,6 +5,7 @@ type variant = [ #filled | #outlined | #standard ]
 
 @module("@mui/material/TextField") @react.component
 external make: (
+    ~inputRef:ReactDOM.domRef=?,
     ~value:string=?,
     ~label:string=?,
     ~size:size=?,
