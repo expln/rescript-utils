@@ -1,6 +1,6 @@
 {
   "name": "@expln/utils",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "sources": {
     "dir" : "src",
     "subdirs" : true
