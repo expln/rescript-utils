@@ -152,7 +152,7 @@ let makeValOpt = (asValOpt:asVal<option<'v>>):val<option<'v>> => {
         switch getByPath(jsonAny, attrName) {
             | Ok(None) => validate(None, validator)
             | Ok(Some(attrVal)) => asValOpt(attrVal, ~validator?, ~default?, ())
-            | Error(msg) => getDefaultOrExn(default, ()=>`an object was expected at '${jsonAny->getPath->pathToStr}'.`)
+            | Error(_) => getDefaultOrExn(default, ()=>`an object was expected at '${jsonAny->getPath->pathToStr}'.`)
         }
     }
 }
@@ -162,7 +162,7 @@ let makeVal = (asVal:asVal<'v>, descrOfExpectedValue:string):val<'v> => {
         switch getByPath(jsonAny, attrName) {
             | Ok(None) => getDefaultOrExn(default, ()=>`${descrOfExpectedValue} was expected at '${getLocation2(jsonAny, attrName)}'.`)
             | Ok(Some(attrVal)) => asVal(attrVal, ~validator?, ~default?, ())
-            | Error(msg) => getDefaultOrExn(default, ()=>`an object was expected at '${jsonAny->getPath->pathToStr}'.`)
+            | Error(_) => getDefaultOrExn(default, ()=>`an object was expected at '${jsonAny->getPath->pathToStr}'.`)
         }
     }
 }
@@ -225,7 +225,7 @@ let arrOpt = (
     switch getByPath(obj, attrName) {
         | Ok(None) => validate(None, validator)
         | Ok(Some(attrVal)) => asArrOpt(attrVal, mapper, ~validator?, ~default?, ())
-        | Error(msg) => getDefaultOrExn(default, ()=>`an object was expected at '${obj->getPath->pathToStr}'.`)
+        | Error(_) => getDefaultOrExn(default, ()=>`an object was expected at '${obj->getPath->pathToStr}'.`)
     }
 }
 
@@ -240,7 +240,7 @@ let arr = (
     switch getByPath(obj, attrName) {
         | Ok(None) => getDefaultOrExn(default, ()=>`an array was expected at '${getLocation2(obj,attrName)}'.`)
         | Ok(Some(attrVal)) => asArr(attrVal, mapper, ~validator?, ~default?, ())
-        | Error(msg) => getDefaultOrExn(default, ()=>`an object was expected at '${obj->getPath->pathToStr}'.`)
+        | Error(_) => getDefaultOrExn(default, ()=>`an object was expected at '${obj->getPath->pathToStr}'.`)
     }
 }
 
@@ -282,7 +282,7 @@ let objOpt = (
     switch getByPath(obj, attrName) {
         | Ok(None) => validate(None, validator)
         | Ok(Some(attrVal)) => asObjOpt(attrVal, mapper, ~validator?, ~default?, ())
-        | Error(msg) => getDefaultOrExn(default, ()=>`an object was expected at '${obj->getPath->pathToStr}'.`)
+        | Error(_) => getDefaultOrExn(default, ()=>`an object was expected at '${obj->getPath->pathToStr}'.`)
     }
 }
 
@@ -297,7 +297,7 @@ let obj = (
     switch getByPath(obj, attrName) {
         | Ok(None) => getDefaultOrExn(default, ()=>`an object was expected at '${getLocation2(obj,attrName)}'.`)
         | Ok(Some(attrVal)) => asObj(attrVal, mapper, ~validator?, ~default?, ())
-        | Error(msg) => getDefaultOrExn(default, ()=>`an object was expected at '${obj->getPath->pathToStr}'.`)
+        | Error(_) => getDefaultOrExn(default, ()=>`an object was expected at '${obj->getPath->pathToStr}'.`)
     }
 }
 
