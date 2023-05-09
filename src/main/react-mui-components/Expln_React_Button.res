@@ -8,5 +8,6 @@ external make: (
     ~disabled:bool=?,
     ~color:string=?,
     ~title:string=?,
+    ~style:reStyle=?,
     ~children: reElem=?
 ) => reElem = "default"
