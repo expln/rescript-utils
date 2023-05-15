@@ -1,0 +1,41 @@
+// Place your key bindings in this file to override the defaults
+[
+    {
+        "key": "insert",
+        "command": "runCommands",
+        "when": "editorTextFocus",
+        "args": {
+            "commands": [
+                {
+                    "command": "editor.action.smartSelect.grow",
+                    "args": {}
+                },
+                {
+                    "command": "editor.action.insertSnippet",
+                    "args": {
+                        "snippet": "${TM_SELECTED_TEXT/\\[(.+)\\]/->Js_array2.unsafe_get($1)/}"
+                    }
+                }
+            ]
+        }
+    },
+    {
+        "key": "shift+insert",
+        "command": "runCommands",
+        "when": "editorTextFocus",
+        "args": {
+            "commands": [
+                {
+                    "command": "editor.action.smartSelect.grow",
+                    "args": {}
+                },
+                {
+                    "command": "editor.action.insertSnippet",
+                    "args": {
+                        "snippet": "${TM_SELECTED_TEXT/\\[(.+)\\]/->Js_array2.unsafe_set($1)/}"
+                    }
+                }
+            ]
+        }
+    }
+]

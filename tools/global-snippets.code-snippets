@@ -32,12 +32,12 @@
 	"callback": { "scope": "", "prefix": "cb", "body": [ "_ => " ] },
 
 	"log-var": { "scope": "", "prefix": "@l", "body": [
-		"$0${TM_CURRENT_LINE/^(\\s*)(\\S.*)@l$/\n$1Js.Console.log2(\"$2\", $2)/}"
+		"$0${TM_CURRENT_LINE/^(\\s*)(\\S.*)@l$/\n$1Js.Console.log2(`$2`, $2)/}"
     ] },
 	"log-text": { "scope": "", "prefix": "@lt", "body": [
-		"$0${TM_CURRENT_LINE/^(\\s*)(\\S.*)@lt$/\n$1Js.Console.log(\"$2\")/}"
+		"$0${TM_CURRENT_LINE/^(\\s*)(\\S.*)@lt$/\n$1Js.Console.log(`$2`)/}"
     ] },
 	"log-delim": { "scope": "", "prefix": "@ld", "body": [
-		"$0${TM_CURRENT_LINE/^(\\s*)(\\S.*)@ld$/\n$1Js.Console.log(\"-------------- $2 ------------------------------------------------------------\")/}"
+		"$0${TM_CURRENT_LINE/^(\\s*)(\\S.*)@ld$/\n$1Js.Console.log(`-------------- $2 ------------------------------------------------------------`)/}"
     ] },
 }

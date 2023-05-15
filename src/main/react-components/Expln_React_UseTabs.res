@@ -14,7 +14,8 @@ type tab<'a> = {
 type state<'a> = {
     nextId: int,
     tabs: array<tab<'a>>,
-    activeTabId: tabId
+    activeTabId: tabId,
+    tabHistory:array<tabId>,
 }
 
 type tabMethods<'a> = {
@@ -33,6 +34,7 @@ let createEmptyState = () => {
         nextId: 0,
         tabs: [],
         activeTabId: "",
+        tabHistory: [],
     }
 }
 
@@ -45,11 +47,14 @@ let getTabs = (st:state<'a>) => st.tabs
 let addTab = (st, ~label:string, ~closable:bool, ~data:'a) => {
     let (st, newId) = st->getNextId
     let newTabs = st.tabs->Js_array2.concat([{id:newId, label, closable, data}])
+    let newActiveTabId = if (newTabs->Js_array2.length == 1) {newId} else {st.activeTabId}
+    let newTabHistory = if (newTabs->Js_array2.length == 1) {[newId]} else {st.tabHistory}
     (
         {
             ...st,
             tabs: newTabs,
-            activeTabId: if (newTabs->Js_array2.length == 1) {newId} else {st.activeTabId}
+            activeTabId: newActiveTabId,
+            tabHistory: newTabHistory,
         },
         newId
     )
@@ -57,7 +62,19 @@ let addTab = (st, ~label:string, ~closable:bool, ~data:'a) => {
 
 let openTab = (st:state<'a>, tabId):state<'a> => {
     if (st.tabs->Js_array2.some(t => t.id == tabId)) {
-        {...st, activeTabId:tabId}
+        {
+            ...st, 
+            activeTabId:tabId, 
+            tabHistory:
+                if (
+                    st.tabHistory->Belt_Array.get(st.tabHistory->Js_array2.length-1)
+                        ->Belt.Option.mapWithDefault(false, lastId => lastId == tabId)
+                ) {
+                    st.tabHistory
+                } else {
+                    st.tabHistory->Js_array2.concat([tabId])
+                }
+        }
     } else {
         st
     }
@@ -65,6 +82,7 @@ let openTab = (st:state<'a>, tabId):state<'a> => {
 
 let removeTab = (st:state<'a>, tabId):state<'a> => {
     let newTabs = st.tabs->Js_array2.filter(t => t.id != tabId)
+    let newTabHistory = st.tabHistory->Js_array2.filter(id => id != tabId)
     {
         ...st, 
         tabs: newTabs,
@@ -72,10 +90,12 @@ let removeTab = (st:state<'a>, tabId):state<'a> => {
             if (newTabs->Js_array2.length == 0) {
                 ""
             } else if (st.activeTabId == tabId) {
-                newTabs[0].id
+                newTabHistory->Belt_Array.get(newTabHistory->Js_array2.length-1)
+                    ->Belt.Option.getWithDefault(newTabs[0].id)
             } else {
                 st.activeTabId
-            }
+            },
+        tabHistory: newTabHistory,
     }
 }
 
@@ -109,14 +129,14 @@ let useTabs = ():tabMethods<'a> => {
                         tabs->Js_array2.map(tab => {
                             <Tab key=tab.id value=tab.id label={
                                 if (tab.closable) {
-                                    <span>
+                                    <span style=ReactDOM.Style.make(~textTransform="none", ())>
                                         {React.string(tab.label)}
                                         <IconButton component="div" 
                                                     onClick={evt => {
                                                         ReactEvent.Synthetic.stopPropagation(evt)
                                                         removeTab(tab.id)
                                                     }} >
-                                            <Icons.Clear />
+                                            <Icons.Clear fontSize="small"  />
                                         </IconButton>
                                     </span>
                                 } else {

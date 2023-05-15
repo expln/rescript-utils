@@ -46,7 +46,7 @@ module Icons = {
 
   module Clear = {
     @module("@mui/icons-material/Clear") @react.component
-    external make: () => React.element = "default"
+    external make: (~fontSize:string=?) => React.element = "default"
   }
 
   module BrightnessLow = {
