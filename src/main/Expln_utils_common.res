@@ -54,9 +54,9 @@ let strCmp = Js.String2.localeCompare->toIntCmp
 let strCmpI = (s1,s2) => strCmp(s1->Js_string2.toLocaleUpperCase ,s2->Js_string2.toLocaleUpperCase)
 let cmpRev = cmp => (a,b) => -cmp(a,b)
 
-let stringify: 'a => string = a => switch Js.Json.stringifyAny(a) {
+let stringify = (a:'a):string => switch Js.Json.stringifyAny(a) {
     | Some(str) => str
-    | None => exn(`Could not stringify '${Js.String2.make(a)}'`)
+    | None => "undefined"
 }
 
 type explnUtilsException = {
